@@ -201,6 +201,48 @@ const sourceUrl = GITHUB_REPO ? `${GITHUB_REPO}/blob/main/src/content/blog/${pos
 			if (blocks.length > 0) {
 				await mermaid.run({ querySelector: '.mermaid' });
 			}
+
+			const toc = document.querySelector('.toc');
+			if (toc) {
+				const links = [...toc.querySelectorAll('a[href^="#"]')];
+				const sections = links
+					.map((link) => ({
+						link,
+						heading: document.getElementById(decodeURIComponent(link.hash.slice(1))),
+					}))
+					.filter((item) => item.heading);
+
+				let frameRequested = false;
+				const updateActiveSection = () => {
+					frameRequested = false;
+					const headerHeight = document.querySelector('header')?.getBoundingClientRect().height ?? 0;
+					const readingLine = headerHeight + 28;
+					let active = sections[0];
+
+					for (const section of sections) {
+						if (section.heading.getBoundingClientRect().top <= readingLine) active = section;
+						else break;
+					}
+
+					for (const section of sections) {
+						const isActive = section === active;
+						section.link.classList.toggle('is-active', isActive);
+						if (isActive) section.link.setAttribute('aria-current', 'location');
+						else section.link.removeAttribute('aria-current');
+					}
+				};
+				const requestActiveUpdate = () => {
+					if (!frameRequested) {
+						frameRequested = true;
+						requestAnimationFrame(updateActiveSection);
+					}
+				};
+
+				window.addEventListener('scroll', requestActiveUpdate, { passive: true });
+				window.addEventListener('resize', requestActiveUpdate);
+				for (const link of links) link.addEventListener('click', requestActiveUpdate);
+				requestActiveUpdate();
+			}
 		</script>
 	</body>
 </html>

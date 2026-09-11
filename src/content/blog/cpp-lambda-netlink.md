@@ -20,8 +20,6 @@ summary: "通过 Linux Netlink Socket 监听内核网口 up/down 变化，用 C+
 cover_image: ""
 ---
 
-# C++ Lambda 与 Netlink Socket 学习笔记：网络端口状态监控模块
-
 > 记录一个网络端口状态监控模块的实现：Netlink 监听内核链路变化 → Lambda 回调 → JSON → MQTT 上报。
 
 ## 概述

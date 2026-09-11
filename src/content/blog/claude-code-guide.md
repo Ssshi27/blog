@@ -18,8 +18,6 @@ summary: "面向零基础用户的 Claude Code 全景指南：安装登录、斜
 cover_image: ""
 ---
 
-# Claude Code 完全使用指南（小白向）
-
 > 本文面向零基础用户，用通俗易懂的语言介绍 Claude Code 的方方面面。读完你会知道它是什么、能做什么、怎么用。
 
 ## 1. 什么是 Claude Code

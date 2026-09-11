@@ -19,8 +19,6 @@ summary: "从一次普通的 ping 出发，拆解 ARP 地址解析与 ICMP 回�
 cover_image: ""
 ---
 
-# ARP 与 ICMP：一次 ping 背后发生了什么
-
 > 看懂一次 ping 的完整过程，就理解了二层地址解析与三层差错/查询报文如何配合工作。
 
 ## 学习目标
