@@ -36,10 +36,10 @@ function fail(file, msg) { errors++; console.error(`  [错误] ${file}: ${msg}`)
 function warn(file, msg) { warnings++; console.warn(`  [警告] ${file}: ${msg}`); }
 
 function parseFrontMatter(content) {
-  const m = content.match(/^---\n([\s\S]*?)\n---/);
+  const m = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!m) return null;
   const data = {};
-  for (const line of m[1].split("\n")) {
+  for (const line of m[1].replace(/\r\n/g, "\n").split("\n")) {
     const kv = line.match(/^(\w+):\s*(.*)$/);
     if (kv) data[kv[1]] = kv[2].replace(/^["']|["']$/g, "");
   }
