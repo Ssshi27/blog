@@ -1,63 +1,46 @@
-# Astro Starter Kit: Blog
+# 学习博客
 
-```sh
-npm create astro@latest -- --template blog
-```
+Markdown 优先的个人学习博客：内容只维护 Markdown，菜单、分类、标签、目录、搜索索引、RSS、Sitemap 全部自动生成。
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+技术栈：**Astro + Markdown (YAML Front Matter) + Mermaid + Pagefind + GitHub Actions + GitHub Pages**
 
-Features:
-
-- ✅ Minimal styling (make it your own!)
-- ✅ 100/100 Lighthouse performance
-- ✅ SEO-friendly with canonical URLs and Open Graph data
-- ✅ Sitemap support
-- ✅ RSS Feed support
-- ✅ Markdown & MDX support
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
+## 目录结构
 
 ```text
-├── public/
-├── src/
-│   ├── assets/
-│   ├── components/
-│   ├── content/
-│   ├── layouts/
-│   └── pages/
-├── astro.config.mjs
-├── README.md
-├── package.json
-└── tsconfig.json
+src/
+├── content/blog/        # 全部文章（Markdown，唯一数据源）
+├── pages/               # 首页/全部文章/分类/标签/学习路径/项目实战/搜索/关于/404
+├── layouts/BlogPost.astro  # 文章详情页（目录、上下篇、相关文章、面包屑、Mermaid）
+├── components/          # 头部、底部、文章卡片等
+├── lib/posts.ts         # 文章查询/排序/相关文章逻辑
+└── consts.ts            # 站点信息 + 固定分类字典
+scripts/
+├── new-post.mjs         # 新文章脚手架
+└── check-posts.mjs      # Front Matter 校验 + 敏感信息扫描 + 图片路径检查
+.github/workflows/deploy.yml  # 推送 main 后自动构建并部署到 GitHub Pages
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## 常用命令
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+```bash
+npm run dev          # 本地开发预览（localhost:4321）
+npm run new:post -- <category> <slug> "标题"   # 新建文章（自带统一模板）
+npm run check:posts  # 内容质量与安全检查
+npm run build        # 构建 dist/ + 生成 Pagefind 搜索索引
+npm run preview      # 预览构建产物
+```
 
-The `src/content/` directory contains "collections" of related Markdown and MDX documents. Use `getCollection()` to retrieve posts from `src/content/blog/`, and type-check your frontmatter using an optional schema. See [Astro's Content Collections docs](https://docs.astro.build/en/guides/content-collections/) to learn more.
+## 发布流程
 
-Any static assets, like images, can be placed in the `public/` directory.
+1. `npm run new:post` 创建草稿（status: draft）。
+2. 编辑 Markdown，Front Matter 填写分类、标签、摘要、质量评分。
+3. `npm run check:posts` 通过后将 `status` 改为 `published`（质量评分 ≥20）。
+4. `git commit && git push`，GitHub Actions 自动部署。
 
-## 🧞 Commands
+只有 `published` 状态的文章出现在首页和列表页；`archived` 保留访问但不在列表展示。
 
-All commands are run from the root of the project, from a terminal:
+## 部署前需要配置
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Check out [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
-
-## Credit
-
-This theme is based off of the lovely [Bear Blog](https://github.com/HermanMartinus/bearblog/).
+1. 在 GitHub 仓库 **Settings → Pages** 中将 Source 设为 **GitHub Actions**。
+2. 修改 `astro.config.mjs` 的 `site` 为你的 Pages 地址；若仓库名不是 `<用户名>.github.io`，还需设置 `base: '/仓库名'`。
+3. 在 `src/consts.ts` 填写 `GITHUB_REPO`，文章页会出现"查看 Markdown 源文件"链接。
