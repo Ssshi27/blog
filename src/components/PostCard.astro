@@ -1,0 +1,93 @@
+---
+import { CATEGORIES, DIFFICULTY_LABELS } from '../consts';
+import { postUrl, type Post } from '../lib/posts';
+import FormattedDate from './FormattedDate.astro';
+
+interface Props {
+	post: Post;
+}
+
+const { post } = Astro.props;
+const categoryLabel = CATEGORIES[post.data.category] ?? post.data.category;
+---
+
+<article class="post-card">
+	<h3>
+		<a href={postUrl(post)}>{post.data.title}</a>
+	</h3>
+	<p class="summary">{post.data.summary}</p>
+	<div class="meta">
+		<span class="category">{categoryLabel}</span>
+		<span class="difficulty">{DIFFICULTY_LABELS[post.data.difficulty]}</span>
+		<FormattedDate date={post.data.date} />
+	</div>
+	{
+		post.data.tags.length > 0 && (
+			<div class="tags">
+				{post.data.tags.map((tag) => (
+					<a class="tag" href={`/tags/${encodeURIComponent(tag)}/`}>
+						#{tag}
+					</a>
+				))}
+			</div>
+		)
+	}
+</article>
+<style>
+	.post-card {
+		padding: 1.2em 1.4em;
+		border: 1px solid rgba(var(--gray), 25%);
+		border-radius: 10px;
+		background: white;
+		transition: box-shadow 0.15s ease;
+	}
+	.post-card:hover {
+		box-shadow: var(--box-shadow);
+	}
+	h3 {
+		margin: 0 0 0.4em;
+		font-size: 1.2em;
+	}
+	h3 a {
+		text-decoration: none;
+		color: var(--black);
+	}
+	h3 a:hover {
+		color: var(--accent);
+	}
+	.summary {
+		margin: 0 0 0.8em;
+		color: rgb(var(--gray));
+		font-size: 0.95em;
+	}
+	.meta {
+		display: flex;
+		align-items: center;
+		gap: 0.8em;
+		font-size: 0.85em;
+		color: rgb(var(--gray));
+	}
+	.category {
+		color: var(--accent);
+		font-weight: 700;
+	}
+	.difficulty {
+		padding: 0.1em 0.5em;
+		border-radius: 4px;
+		background: rgba(var(--gray-light), 0.5);
+	}
+	.tags {
+		margin-top: 0.6em;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5em;
+	}
+	.tag {
+		font-size: 0.8em;
+		color: rgb(var(--gray));
+		text-decoration: none;
+	}
+	.tag:hover {
+		color: var(--accent);
+	}
+</style>

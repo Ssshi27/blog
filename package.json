@@ -1,0 +1,29 @@
+{
+  "name": "",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && pagefind --site dist",
+    "preview": "astro preview",
+    "astro": "astro",
+    "new:post": "node scripts/new-post.mjs",
+    "check:posts": "node scripts/check-posts.mjs"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^8.0.1",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.4",
+    "@iconify/utils": "^3.1.7",
+    "astro": "^7.3.2",
+    "mermaid": "^12.0.0",
+    "pagefind": "^1.5.2",
+    "sharp": "^0.35.0"
+  },
+  "allowScripts": {
+    "esbuild": true
+  }
+}

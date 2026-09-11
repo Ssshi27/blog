@@ -1,0 +1,50 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import PostCard from '../components/PostCard.astro';
+import { SITE_TITLE } from '../consts';
+import { getPublishedPosts } from '../lib/posts';
+
+const posts = await getPublishedPosts();
+const projects = posts.filter((p) => p.data.category === 'projects');
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`项目实战 | ${SITE_TITLE}`} description="动手实践类项目文章" />
+		<style>
+			.posts {
+				display: grid;
+				gap: 1em;
+			}
+			.empty {
+				padding: 2em;
+				text-align: center;
+				color: rgb(var(--gray));
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>项目实战</h1>
+			<p>动手做项目的完整记录：背景、方案、过程、结果与踩坑。</p>
+			{
+				projects.length > 0 ? (
+					<div class="posts">
+						{projects.map((post) => (
+							<PostCard post={post} />
+						))}
+					</div>
+				) : (
+					<div class="empty">
+						还没有项目实战文章。写文章时把 Front Matter 的 category 设为 projects 即可出现在这里。
+					</div>
+				)
+			}
+		</main>
+		<Footer />
+	</body>
+</html>

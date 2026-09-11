@@ -1,0 +1,31 @@
+---
+import { render } from 'astro:content';
+import BlogPost from '../../layouts/BlogPost.astro';
+import { getPublishedPosts, getRelatedPosts, getVisiblePosts, type Post } from '../../lib/posts';
+
+export async function getStaticPaths() {
+	const posts = await getVisiblePosts();
+	return posts.map((post) => ({
+		params: { slug: post.id },
+		props: { post },
+	}));
+}
+
+interface Props {
+	post: Post;
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+
+const published = await getPublishedPosts();
+const index = published.findIndex((p) => p.id === post.id);
+// published 按日期倒序：index - 1 是更新的一篇，index + 1 是更早的一篇
+const next = index > 0 ? published[index - 1] : undefined;
+const prev = index >= 0 && index < published.length - 1 ? published[index + 1] : undefined;
+const related = getRelatedPosts(post, published);
+---
+
+<BlogPost post={post} headings={headings} prev={prev} next={next} related={related}>
+	<Content />
+</BlogPost>

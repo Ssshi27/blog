@@ -1,0 +1,65 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import Header from '../../components/Header.astro';
+import PostCard from '../../components/PostCard.astro';
+import { SITE_TITLE } from '../../consts';
+import { getPublishedPosts } from '../../lib/posts';
+
+const posts = await getPublishedPosts();
+
+// 按年份分组
+const byYear = new Map<number, typeof posts>();
+for (const post of posts) {
+	const year = post.data.date.getFullYear();
+	if (!byYear.has(year)) byYear.set(year, []);
+	byYear.get(year)!.push(post);
+}
+const years = [...byYear.keys()].sort((a, b) => b - a);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`全部文章 | ${SITE_TITLE}`} description="所有已发布的学习文章" />
+		<style>
+			.posts {
+				display: grid;
+				gap: 1em;
+			}
+			.year {
+				color: rgb(var(--gray));
+				border-bottom: 1px solid rgba(var(--gray), 25%);
+				padding-bottom: 0.3em;
+			}
+			.empty {
+				padding: 2em;
+				text-align: center;
+				color: rgb(var(--gray));
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>全部文章（{posts.length}）</h1>
+			{
+				years.length > 0 ? (
+					years.map((year) => (
+						<section>
+							<h2 class="year">{year}</h2>
+							<div class="posts">
+								{byYear.get(year)!.map((post) => (
+									<PostCard post={post} />
+								))}
+							</div>
+						</section>
+					))
+				) : (
+					<div class="empty">还没有已发布的文章。</div>
+				)
+			}
+		</main>
+		<Footer />
+	</body>
+</html>

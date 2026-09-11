@@ -1,0 +1,274 @@
+---
+import type { MarkdownHeading } from 'astro';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import Header from '../components/Header.astro';
+import { CATEGORIES, DIFFICULTY_LABELS, GITHUB_REPO } from '../consts';
+import { postUrl, type Post } from '../lib/posts';
+
+interface Props {
+	post: Post;
+	headings: MarkdownHeading[];
+	prev?: Post;
+	next?: Post;
+	related: Post[];
+}
+
+const { post, headings, prev, next, related } = Astro.props;
+const { title, summary, date, updated, category, subcategory, tags, difficulty, status, quality_score, source } =
+	post.data;
+const categoryLabel = CATEGORIES[category] ?? category;
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const sourceUrl = GITHUB_REPO ? `${GITHUB_REPO}/blob/main/src/content/blog/${post.id}.md` : null;
+---
+
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={title} description={summary} />
+		<style>
+			.layout {
+				display: grid;
+				grid-template-columns: minmax(0, 720px) 240px;
+				gap: 2em;
+				justify-content: center;
+				align-items: start;
+				padding: 1em;
+			}
+			.prose {
+				width: 100%;
+				max-width: 720px;
+				color: rgb(var(--gray-dark));
+			}
+			.breadcrumb {
+				font-size: 0.85em;
+				color: rgb(var(--gray));
+				margin-bottom: 1em;
+			}
+			.breadcrumb a {
+				color: rgb(var(--gray));
+			}
+			.title-block {
+				margin-bottom: 1.5em;
+				padding-bottom: 1em;
+				border-bottom: 1px solid rgba(var(--gray), 25%);
+			}
+			.title-block h1 {
+				margin: 0 0 0.4em;
+			}
+			.meta {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.8em;
+				font-size: 0.85em;
+				color: rgb(var(--gray));
+			}
+			.meta .category {
+				color: var(--accent);
+				font-weight: 700;
+			}
+			.meta a {
+				color: inherit;
+			}
+			.notice {
+				padding: 0.8em 1em;
+				border-radius: 8px;
+				background: rgba(var(--gray-light), 0.6);
+				font-size: 0.9em;
+				margin-bottom: 1.5em;
+			}
+			.toc {
+				position: sticky;
+				top: 5em;
+				font-size: 0.85em;
+				padding: 1em;
+				border-left: 3px solid rgba(var(--gray), 25%);
+			}
+			.toc h4 {
+				margin: 0 0 0.5em;
+			}
+			.toc ul {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+			}
+			.toc li {
+				margin: 0.35em 0;
+			}
+			.toc li.depth-3 {
+				padding-left: 1em;
+			}
+			.toc a {
+				text-decoration: none;
+				color: rgb(var(--gray));
+			}
+			.toc a:hover {
+				color: var(--accent);
+			}
+			.prev-next {
+				display: flex;
+				justify-content: space-between;
+				gap: 1em;
+				margin-top: 3em;
+				padding-top: 1.5em;
+				border-top: 1px solid rgba(var(--gray), 25%);
+			}
+			.prev-next a {
+				max-width: 48%;
+				text-decoration: none;
+				color: var(--accent);
+			}
+			.prev-next .label {
+				display: block;
+				font-size: 0.8em;
+				color: rgb(var(--gray));
+			}
+			.related {
+				margin-top: 2.5em;
+				padding-top: 1.5em;
+				border-top: 1px solid rgba(var(--gray), 25%);
+			}
+			.related ul {
+				padding-left: 1.2em;
+			}
+			.source-link {
+				margin-top: 1.5em;
+				font-size: 0.85em;
+			}
+			@media (max-width: 1000px) {
+				.layout {
+					grid-template-columns: minmax(0, 720px);
+				}
+				.toc {
+					display: none;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<Header />
+		<main>
+			<div class="layout">
+				<article class="prose">
+					<nav class="breadcrumb" aria-label="面包屑">
+						<a href="/">首页</a> / <a href="/blog">全部文章</a> /{' '}
+						<a href={`/categories/${category}/`}>{categoryLabel}</a> / {title}
+					</nav>
+					{
+						status === 'archived' && (
+							<div class="notice">本文已归档：内容可能过时，仅在历史记录中保留。</div>
+						)
+					}
+					<div class="title-block">
+						<h1>{title}</h1>
+						<div class="meta">
+							<span class="category">
+								{categoryLabel}{subcategory && ` / ${subcategory}`}
+							</span>
+							<span>{DIFFICULTY_LABELS[difficulty]}</span>
+							<span>发布于 <FormattedDate date={date} /></span>
+							{updated && <span>更新于 <FormattedDate date={updated} /></span>}
+							{quality_score != null && <span>质量评分 {quality_score}/25</span>}
+							{source && <span>来源：{source}</span>}
+						</div>
+						{
+							tags.length > 0 && (
+								<div class="meta" style="margin-top: 0.5em;">
+									{tags.map((tag) => (
+										<a href={`/tags/${encodeURIComponent(tag)}/`}>#{tag}</a>
+									))}
+								</div>
+							)
+						}
+					</div>
+
+					<slot />
+
+					{
+						sourceUrl && (
+							<p class="source-link">
+								<a href={sourceUrl} target="_blank" rel="noopener">
+									查看 / 编辑本文 Markdown 源文件 →
+								</a>
+							</p>
+						)
+					}
+
+					<nav class="prev-next">
+						<span>
+							{
+								prev && (
+									<a href={postUrl(prev)}>
+										<span class="label">上一篇</span>
+										{prev.data.title}
+									</a>
+								)
+							}
+						</span>
+						<span style="text-align: right;">
+							{
+								next && (
+									<a href={postUrl(next)}>
+										<span class="label">下一篇</span>
+										{next.data.title}
+									</a>
+								)
+							}
+						</span>
+					</nav>
+
+					{
+						related.length > 0 && (
+							<section class="related">
+								<h3>相关文章</h3>
+								<ul>
+									{related.map((p) => (
+										<li>
+											<a href={postUrl(p)}>{p.data.title}</a>
+										</li>
+									))}
+								</ul>
+							</section>
+						)
+					}
+				</article>
+
+				{
+					toc.length > 0 && (
+						<aside class="toc">
+							<h4>本文目录</h4>
+							<ul>
+								{toc.map((h) => (
+									<li class={`depth-${h.depth}`}>
+										<a href={`#${h.slug}`}>{h.text}</a>
+									</li>
+								))}
+							</ul>
+						</aside>
+					)
+				}
+			</div>
+		</main>
+		<Footer />
+
+		<script>
+			import mermaid from 'mermaid';
+
+			mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'strict' });
+
+			const blocks = document.querySelectorAll('pre > code.language-mermaid');
+			for (const code of blocks) {
+				const pre = code.parentElement;
+				if (!pre) continue;
+				const container = document.createElement('pre');
+				container.className = 'mermaid';
+				container.textContent = code.textContent ?? '';
+				pre.replaceWith(container);
+			}
+			if (blocks.length > 0) {
+				await mermaid.run({ querySelector: '.mermaid' });
+			}
+		</script>
+	</body>
+</html>

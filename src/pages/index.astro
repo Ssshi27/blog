@@ -1,0 +1,130 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import PostCard from '../components/PostCard.astro';
+import { CATEGORIES, SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { getPublishedPosts } from '../lib/posts';
+
+const posts = await getPublishedPosts();
+const recent = posts.slice(0, 6);
+
+const usedCategories = [...new Set(posts.map((p) => p.data.category))];
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<style>
+			.hero {
+				text-align: center;
+				padding: 2.5em 1em 1.5em;
+			}
+			.hero h1 {
+				margin-bottom: 0.3em;
+			}
+			.hero p {
+				color: rgb(var(--gray));
+			}
+			.stats {
+				display: flex;
+				justify-content: center;
+				gap: 2em;
+				margin-top: 1em;
+				color: rgb(var(--gray));
+				font-size: 0.95em;
+			}
+			.stats strong {
+				color: var(--accent);
+			}
+			.section-title {
+				display: flex;
+				justify-content: space-between;
+				align-items: baseline;
+			}
+			.section-title a {
+				font-size: 0.85em;
+				text-decoration: none;
+			}
+			.posts {
+				display: grid;
+				gap: 1em;
+			}
+			.categories {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.6em;
+			}
+			.categories a {
+				padding: 0.4em 0.9em;
+				border: 1px solid rgba(var(--gray), 30%);
+				border-radius: 999px;
+				text-decoration: none;
+				color: rgb(var(--gray-dark));
+				background: white;
+				font-size: 0.9em;
+			}
+			.categories a:hover {
+				border-color: var(--accent);
+				color: var(--accent);
+			}
+			.empty {
+				padding: 2em;
+				text-align: center;
+				color: rgb(var(--gray));
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<section class="hero">
+				<h1>{SITE_TITLE}</h1>
+				<p>{SITE_DESCRIPTION}</p>
+				<div class="stats">
+					<span><strong>{posts.length}</strong> 篇已发布</span>
+					<span><strong>{usedCategories.length}</strong> 个分类</span>
+					<span><strong>{new Set(posts.flatMap((p) => p.data.tags)).size}</strong> 个标签</span>
+				</div>
+			</section>
+
+			<section>
+				<div class="section-title">
+					<h2>最新文章</h2>
+					<a href="/blog">查看全部 →</a>
+				</div>
+				{
+					recent.length > 0 ? (
+						<div class="posts">
+							{recent.map((post) => (
+								<PostCard post={post} />
+							))}
+						</div>
+					) : (
+						<div class="empty">
+							还没有已发布的文章。运行 <code>npm run new:post</code> 创建第一篇吧。
+						</div>
+					)
+				}
+			</section>
+
+			{
+				usedCategories.length > 0 && (
+					<section>
+						<div class="section-title">
+							<h2>分类</h2>
+							<a href="/categories">全部分类 →</a>
+						</div>
+						<div class="categories">
+							{usedCategories.map((c) => (
+								<a href={`/categories/${c}/`}>{CATEGORIES[c] ?? c}</a>
+							))}
+						</div>
+					</section>
+				)
+			}
+		</main>
+		<Footer />
+	</body>
+</html>

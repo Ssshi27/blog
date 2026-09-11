@@ -1,0 +1,49 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`关于 | ${SITE_TITLE}`} description="关于这个学习博客" />
+		<style>
+			main {
+				max-width: 720px;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>关于</h1>
+			<p>
+				这是一个 <strong>Markdown 优先</strong> 的个人学习博客：所有内容以 Markdown
+				文件的形式维护在 <code>src/content/blog/</code> 目录中，网站的 HTML、目录、
+				导航、搜索索引全部由构建流程自动生成。
+			</p>
+			<h2>内容如何流转</h2>
+			<ol>
+				<li>学习内容（对话记录、实验笔记、项目总结）先进入 <code>inbox</code>；</li>
+				<li>整理成统一模板的文章后标记为 <code>draft</code>；</li>
+				<li>质量评分达到 20/25 且通过检查后标记为 <code>published</code>，出现在网站上；</li>
+				<li>过时内容标记为 <code>archived</code>，保留但不在首页展示。</li>
+			</ol>
+			<h2>技术栈</h2>
+			<ul>
+				<li>静态站点：Astro + Markdown (YAML Front Matter)</li>
+				<li>流程图 / 时序图：Mermaid</li>
+				<li>搜索：Pagefind</li>
+				<li>部署：GitHub Actions + GitHub Pages</li>
+			</ul>
+			<h2>维护方式</h2>
+			<p>
+				新增文章只需运行 <code>npm run new:post</code>
+				生成模板，编辑 Markdown 后提交；菜单、分类页、标签页、搜索索引都会自动更新，无需手动修改任何 HTML。
+			</p>
+		</main>
+		<Footer />
+	</body>
+</html>

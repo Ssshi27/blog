@@ -1,0 +1,77 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { CATEGORIES, DIFFICULTY_LABELS, SITE_TITLE } from '../consts';
+import { getPublishedPosts, postUrl, type Post } from '../lib/posts';
+
+const posts = await getPublishedPosts();
+
+// 按分类分组，组内按难度 入门→进阶→高级 排序，形成学习路径
+const ORDER = ['beginner', 'intermediate', 'advanced'];
+const byCategory = new Map<string, Post[]>();
+for (const post of posts) {
+	if (!byCategory.has(post.data.category)) byCategory.set(post.data.category, []);
+	byCategory.get(post.data.category)!.push(post);
+}
+for (const list of byCategory.values()) {
+	list.sort((a, b) => ORDER.indexOf(a.data.difficulty) - ORDER.indexOf(b.data.difficulty));
+}
+const categories = [...byCategory.keys()].sort((a, b) =>
+	(CATEGORIES[a] ?? a).localeCompare(CATEGORIES[b] ?? b, 'zh-CN'),
+);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`学习路径 | ${SITE_TITLE}`} description="按分类和难度组织的学习路径" />
+		<style>
+			.path {
+				margin-bottom: 2em;
+			}
+			.path ol {
+				padding-left: 1.4em;
+			}
+			.path li {
+				margin: 0.5em 0;
+			}
+			.path a {
+				text-decoration: none;
+			}
+			.badge {
+				font-size: 0.75em;
+				padding: 0.1em 0.5em;
+				border-radius: 4px;
+				background: rgba(var(--gray-light), 0.6);
+				color: rgb(var(--gray));
+				margin-left: 0.5em;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>学习路径</h1>
+			<p>每个分类下的文章按「入门 → 进阶 → 高级」排序，顺着读即可形成一条学习路径。</p>
+			{
+				categories.map((category) => (
+					<section class="path">
+						<h2>
+							<a href={`/categories/${category}/`}>{CATEGORIES[category] ?? category}</a>
+						</h2>
+						<ol>
+							{byCategory.get(category)!.map((post) => (
+								<li>
+									<a href={postUrl(post)}>{post.data.title}</a>
+									<span class="badge">{DIFFICULTY_LABELS[post.data.difficulty]}</span>
+								</li>
+							))}
+						</ol>
+					</section>
+				))
+			}
+		</main>
+		<Footer />
+	</body>
+</html>

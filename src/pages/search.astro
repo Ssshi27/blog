@@ -1,0 +1,57 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`搜索 | ${SITE_TITLE}`} description="搜索全部文章" />
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>搜索</h1>
+			<div id="search-box">
+				<p id="search-fallback" style="color: rgb(var(--gray));">
+					搜索索引由 Pagefind 在构建时生成。本地开发（npm run dev）下不可用，请先执行
+					<code>npm run build</code> 再用 <code>npm run preview</code> 预览。
+				</p>
+			</div>
+		</main>
+		<Footer />
+
+		<link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+		<script is:inline>
+			(function () {
+				var script = document.createElement('script');
+				script.src = '/pagefind/pagefind-ui.js';
+				script.onload = function () {
+					var fallback = document.getElementById('search-fallback');
+					if (fallback) fallback.remove();
+					new PagefindUI({
+						element: '#search-box',
+						showSubResults: true,
+						showImages: false,
+						translations: {
+							placeholder: '搜索文章标题、摘要、正文…',
+							clear_search: '清除',
+							load_more: '加载更多结果',
+							search_label: '站内搜索',
+							filters_label: '筛选',
+							zero_results: '没有找到与「[SEARCH_TERM]」相关的内容',
+							many_results: '找到 [COUNT] 条与「[SEARCH_TERM]」相关的内容',
+							one_result: '找到 1 条与「[SEARCH_TERM]」相关的内容',
+							alt_search: '没有找到与「[SEARCH_TERM]」相关的内容，试试「[DIFFERENT_TERM]」',
+							search_suggestion: '没有找到与「[SEARCH_TERM]」相关的内容，试试以下搜索：',
+							searching: '正在搜索「[SEARCH_TERM]」…',
+						},
+					});
+				};
+				document.head.appendChild(script);
+			})();
+		</script>
+	</body>
+</html>
