@@ -1,5 +1,6 @@
 ---
 import { SITE_TITLE } from '../consts';
+import { url } from '../lib/posts';
 
 const today = new Date();
 ---
@@ -7,8 +8,8 @@ const today = new Date();
 <footer>
 	&copy; {today.getFullYear()} {SITE_TITLE} · 由 Markdown 自动构建 · 使用 Astro 驱动
 	<div class="footer-links">
-		<a href="/rss.xml">RSS 订阅</a>
-		<a href="/sitemap-index.xml">站点地图</a>
+		<a href={url('/rss.xml')}>RSS 订阅</a>
+		<a href={url('/sitemap-index.xml')}>站点地图</a>
 	</div>
 </footer>
 <style>

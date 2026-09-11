@@ -5,7 +5,7 @@ import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 import { CATEGORIES, DIFFICULTY_LABELS, GITHUB_REPO } from '../consts';
-import { postUrl, type Post } from '../lib/posts';
+import { postUrl, url, type Post } from '../lib/posts';
 
 interface Props {
 	post: Post;
@@ -152,8 +152,8 @@ const sourceUrl = GITHUB_REPO ? `${GITHUB_REPO}/blob/main/src/content/blog/${pos
 			<div class="layout">
 				<article class="prose">
 					<nav class="breadcrumb" aria-label="面包屑">
-						<a href="/">首页</a> / <a href="/blog">全部文章</a> /{' '}
-						<a href={`/categories/${category}/`}>{categoryLabel}</a> / {title}
+						<a href={url('/')}>首页</a> / <a href={url('/blog')}>全部文章</a> /{' '}
+						<a href={url(`/categories/${category}/`)}>{categoryLabel}</a> / {title}
 					</nav>
 					{
 						status === 'archived' && (
@@ -176,7 +176,7 @@ const sourceUrl = GITHUB_REPO ? `${GITHUB_REPO}/blob/main/src/content/blog/${pos
 							tags.length > 0 && (
 								<div class="meta" style="margin-top: 0.5em;">
 									{tags.map((tag) => (
-										<a href={`/tags/${encodeURIComponent(tag)}/`}>#{tag}</a>
+										<a href={url(`/tags/${encodeURIComponent(tag)}/`)}>#{tag}</a>
 									))}
 								</div>
 							)

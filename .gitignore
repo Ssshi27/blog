@@ -22,3 +22,9 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# WorkBuddy 本地代理数据
+.workbuddy/
+
+# 临时检查目录
+.remote-blog-inspect/

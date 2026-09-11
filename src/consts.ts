@@ -3,9 +3,8 @@
 export const SITE_TITLE = '学习博客';
 export const SITE_DESCRIPTION = '把高质量学习内容沉淀为结构化、可检索的个人知识库';
 
-// GitHub 仓库地址（配置后文章页会显示“查看 Markdown 源文件”链接）
-// 示例: 'https://github.com/yourname/learning-blog'
-export const GITHUB_REPO = '';
+// GitHub 仓库地址（文章页会显示"查看 Markdown 源文件"链接）
+export const GITHUB_REPO = 'https://github.com/Ssshi27/blog';
 
 // 固定分类字典：新增文章优先使用已有分类，避免创建过多相似分类
 export const CATEGORIES: Record<string, string> = {

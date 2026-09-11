@@ -27,9 +27,15 @@ export function sortByDate(posts: Post[]): Post[] {
 	return posts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 }
 
+/** 生成带 base 前缀的站内链接（GitHub Pages 项目站点必须） */
+export function url(path: string): string {
+	const base = import.meta.env.BASE_URL.replace(/\/$/, ''); // '/blog' 或 ''
+	return `${base}/${path.replace(/^\//, '')}`;
+}
+
 /** 文章 URL 路径 */
 export function postUrl(post: Post): string {
-	return `/blog/${post.id}/`;
+	return url(`/blog/${post.id}/`);
 }
 
 /** 相关文章：同分类优先，其次共享标签，最多 count 篇 */

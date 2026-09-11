@@ -4,12 +4,12 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import { defineConfig, fontProviders } from 'astro/config';
 
-// 部署到 GitHub Pages 项目站点时，把 site 改为你的 Pages 地址，
-// 例如 site: 'https://yourname.github.io'；若仓库名不是 yourname.github.io，
-// 还需要设置 base: '/仓库名'
+// GitHub Pages 项目站点：https://ssshi27.github.io/blog
+// 仓库名不是 <用户名>.github.io，因此必须设置 base: '/blog'
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://example.com',
+	site: 'https://ssshi27.github.io',
+	base: '/blog',
 	integrations: [mdx(), sitemap()],
 	markdown: {
 		syntaxHighlight: {

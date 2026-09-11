@@ -3,7 +3,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import { CATEGORIES, DIFFICULTY_LABELS, SITE_TITLE } from '../consts';
-import { getPublishedPosts, postUrl, type Post } from '../lib/posts';
+import { getPublishedPosts, postUrl, url, type Post } from '../lib/posts';
 
 const posts = await getPublishedPosts();
 
@@ -58,7 +58,7 @@ const categories = [...byCategory.keys()].sort((a, b) =>
 				categories.map((category) => (
 					<section class="path">
 						<h2>
-							<a href={`/categories/${category}/`}>{CATEGORIES[category] ?? category}</a>
+							<a href={url(`/categories/${category}/`)}>{CATEGORIES[category] ?? category}</a>
 						</h2>
 						<ol>
 							{byCategory.get(category)!.map((post) => (

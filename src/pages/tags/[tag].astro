@@ -4,7 +4,7 @@ import Footer from '../../components/Footer.astro';
 import Header from '../../components/Header.astro';
 import PostCard from '../../components/PostCard.astro';
 import { SITE_TITLE } from '../../consts';
-import { getPublishedPosts } from '../../lib/posts';
+import { getPublishedPosts, url } from '../../lib/posts';
 
 export async function getStaticPaths() {
 	const posts = await getPublishedPosts();
@@ -40,7 +40,7 @@ const { posts } = Astro.props;
 	<body>
 		<Header />
 		<main>
-			<nav class="breadcrumb"><a href="/">首页</a> / <a href="/tags">标签</a> / #{tag}</nav>
+			<nav class="breadcrumb"><a href={url('/')}>首页</a> / <a href={url('/tags')}>标签</a> / #{tag}</nav>
 			<h1>#{tag}（{posts.length}）</h1>
 			<div class="posts">
 				{posts.map((post) => <PostCard post={post} />)}

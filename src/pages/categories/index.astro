@@ -3,7 +3,7 @@ import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
 import Header from '../../components/Header.astro';
 import { CATEGORIES, SITE_TITLE } from '../../consts';
-import { getPublishedPosts } from '../../lib/posts';
+import { getPublishedPosts, url } from '../../lib/posts';
 
 const posts = await getPublishedPosts();
 const counts = new Map<string, number>();
@@ -50,7 +50,7 @@ const categories = [...counts.entries()].sort((a, b) => b[1] - a[1]);
 			<div class="grid">
 				{
 					categories.map(([slug, count]) => (
-						<a class="card" href={`/categories/${slug}/`}>
+						<a class="card" href={url(`/categories/${slug}/`)}>
 							<h3>{CATEGORIES[slug] ?? slug}</h3>
 							<span>{count} 篇文章</span>
 						</a>
