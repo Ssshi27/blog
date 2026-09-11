@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 完全使用指南（VS Code 版）</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>" type="image/svg+xml">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-secondary: #f6f8fa;
+    --text: #1a1a2e;
+    --text-secondary: #555;
+    --border: #e2e4e8;
+    --accent: #d97706;
+    --accent-light: #fef3c7;
+    --code-bg: #f0f0f0;
+    --table-stripe: #f9fafb;
+    --link: #d97706;
+    --heading: #111;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --radius: 8px;
+    --sidebar-width: 260px;
+    --blockquote-border: #d97706;
+    --hr-color: #e5e5e5;
+    --toc-active-bg: #fef3c7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ═══════════ SIDEBAR ═══════════ */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: var(--sidebar-width);
+    background: #0f172a;
+    color: #cbd5e1;
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+  .sidebar-header {
+    padding: 24px 20px 16px;
+    border-bottom: 1px solid #1e293b;
+    flex-shrink: 0;
+  }
+  .sidebar-header .logo {
+    font-size: 1.15em; font-weight: 700; color: #f8fafc;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sidebar-header .logo .icon { font-size: 1.3em; }
+  .sidebar-header .sub {
+    font-size: 0.72em; color: #64748b; margin-top: 4px;
+  }
+
+  .sidebar-nav { padding: 10px 0; flex: 1; overflow-y: auto; }
+  .sidebar-nav a {
+    display: block; padding: 6px 20px;
+    font-size: 0.82em; color: #94a3b8;
+    text-decoration: none;
+    transition: all 0.12s;
+    border-left: 2px solid transparent;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .sidebar-nav a:hover { color: #f1f5f9; background: rgba(255,255,255,0.04); }
+  .sidebar-nav a.active {
+    color: #fbbf24; background: rgba(251,191,36,0.08);
+    border-left-color: #fbbf24; font-weight: 600;
+  }
+  .sidebar-nav .toc-num { display: inline-block; width: 22px; color: #fbbf24; font-weight: 600; font-size: 0.85em; }
+
+  .sidebar-footer {
+    padding: 12px 20px; border-top: 1px solid #1e293b;
+    font-size: 0.7em; color: #475569; flex-shrink: 0;
+  }
+
+  /* ═══════════ MAIN ═══════════ */
+
+  /* ── Header ── */
+  .hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #fff;
+    padding: 50px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute; top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 30% 70%, rgba(217,119,6,0.15) 0%, transparent 50%),
+                radial-gradient(circle at 70% 30%, rgba(59,130,246,0.1) 0%, transparent 50%);
+    animation: heroGlow 12s ease-in-out infinite;
+  }
+  @keyframes heroGlow {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-2%, 2%); }
+  }
+  .hero > * { position: relative; z-index: 1; }
+  .hero h1 { font-size: 2.4em; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 10px; }
+  .hero .subtitle { font-size: 1.1em; opacity: 0.8; font-weight: 400; }
+  .hero .badge {
+    display: inline-block; margin-top: 16px;
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+    padding: 5px 16px; border-radius: 20px; font-size: 0.82em;
+  }
+
+  /* ── Content ── */
+  .content { padding: 24px 40px 60px; }
+
+  h2 {
+    font-size: 1.65em; font-weight: 700; color: var(--heading);
+    margin: 48px 0 14px; padding-bottom: 8px;
+    border-bottom: 2px solid var(--accent);
+    scroll-margin-top: 20px;
+  }
+  h3 { font-size: 1.22em; font-weight: 600; color: var(--heading); margin: 30px 0 10px; scroll-margin-top: 20px; }
+  h4 { font-size: 1.05em; font-weight: 600; margin: 20px 0 8px; }
+
+  p { margin: 10px 0; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  blockquote {
+    border-left: 4px solid var(--blockquote-border);
+    padding: 10px 20px; margin: 16px 0;
+    background: var(--accent-light);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    color: #7c2d12;
+  }
+
+  hr { border: none; border-top: 1px solid var(--hr-color); margin: 36px 0; }
+
+  /* ── Code ── */
+  code {
+    font-family: "Cascadia Code", "Fira Code", "JetBrains Mono", "SF Mono", Consolas, monospace;
+    font-size: 0.86em;
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  pre {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    padding: 18px 22px;
+    border-radius: var(--radius);
+    overflow-x: auto;
+    margin: 14px 0;
+    font-size: 0.86em;
+    line-height: 1.6;
+    position: relative;
+  }
+  pre code {
+    background: transparent; color: inherit; padding: 0; white-space: pre;
+    font-size: inherit;
+  }
+  pre[data-lang]::before {
+    content: attr(data-lang);
+    position: absolute; top: 8px; right: 14px;
+    font-size: 0.7em; text-transform: uppercase;
+    color: #6c7086; letter-spacing: 0.05em;
+  }
+
+  /* ── Tables ── */
+  .table-wrap { overflow-x: auto; margin: 14px 0; }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 0.91em; box-shadow: var(--shadow);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  th, td {
+    text-align: left; padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: var(--bg-secondary); font-weight: 600;
+    color: var(--heading); white-space: nowrap;
+  }
+  tr:nth-child(even) td { background: var(--table-stripe); }
+  tr:last-child td { border-bottom: none; }
+
+  /* ── Callout boxes ── */
+  .callout {
+    border-radius: var(--radius); padding: 16px 20px; margin: 16px 0;
+    border-left: 4px solid;
+  }
+  .callout-tip  { background: #ecfdf5; border-color: #10b981; color: #065f46; }
+  .callout-warn { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
+  .callout-info { background: #eff6ff; border-color: #3b82f6; color: #1e3a5f; }
+  .callout-title { font-weight: 700; margin-bottom: 4px; }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center; padding: 32px 20px; color: #999; font-size: 0.85em;
+    border-top: 1px solid var(--border); margin-top: 40px;
+  }
+
+  /* ── Mobile: sidebar toggle ── */
+  .sidebar-toggle {
+    display: none; position: fixed; top: 12px; left: 12px; z-index: 200;
+    width: 38px; height: 38px;
+    background: #0f172a; color: #fbbf24; border: none;
+    border-radius: 8px; font-size: 1.2em; cursor: pointer;
+  }
+
+  /* ── Right Sidebar ── */
+  .right-sidebar {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 240px;
+    padding: 30px 20px;
+    overflow-y: auto;
+    border-left: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .profile-card {
+    text-align: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .profile-avatar {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2em;
+    margin: 0 auto 12px;
+    box-shadow: 0 4px 16px rgba(102,126,234,0.3);
+  }
+  .profile-name { font-size: 1.1em; font-weight: 700; margin-bottom: 4px; }
+  .profile-motto { font-size: 0.82em; color: var(--text-secondary); }
+  .profile-stats { display: flex; justify-content: center; gap: 20px; margin-top: 14px; }
+  .profile-stats .stat { text-align: center; }
+  .profile-stats .stat-num { font-size: 1.2em; font-weight: 700; color: var(--accent); }
+  .profile-stats .stat-label { font-size: 0.7em; color: var(--text-secondary); }
+  .profile-links { display: flex; justify-content: center; gap: 12px; margin-top: 14px; }
+  .profile-links a {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--bg-secondary); display: flex; align-items: center; justify-content: center;
+    text-decoration: none; font-size: 1em; transition: all 0.2s;
+  }
+  .profile-links a:hover { background: var(--accent); transform: translateY(-2px); }
+  .right-section { margin-bottom: 20px; }
+  .right-section-title { font-size: 0.85em; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .right-section ul { list-style: none; }
+  .right-section li { font-size: 0.78em; color: var(--text-secondary); padding: 5px 0; border-bottom: 1px dashed #eee; }
+  .right-section li a { color: var(--text); text-decoration: none; }
+  .right-section li a:hover { color: var(--link); }
+  .right-section li .date { font-size: 0.85em; color: #aaa; margin-left: 4px; }
+
+  .main-wrapper { margin-left: var(--sidebar-width); margin-right: 240px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .right-sidebar { display: none; }
+    .main-wrapper { margin-right: 0; }
+  }
+  @media (max-width: 900px) {
+    .sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.25s;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-toggle { display: flex; align-items: center; justify-content: center; }
+    .main-wrapper { margin-left: 0; }
+    .hero { padding: 36px 24px; }
+    .hero h1 { font-size: 1.6em; }
+    .content { padding: 16px 24px 40px; }
+    h2 { font-size: 1.35em; }
+    pre { padding: 14px 16px; font-size: 0.8em; }
+    th, td { padding: 8px 10px; font-size: 0.83em; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ SIDEBAR OVERLAY (mobile) ═══════════════ -->
+<div class="sidebar-overlay" id="sidebarOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:99;" onclick="closeSidebar()"></div>
+
+<button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">☰</button>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo"><span class="icon">🤖</span> Claude Code</div>
+    <div class="sub">VS Code 完全使用指南</div>
+  </div>
+  <nav class="sidebar-nav" id="sidebarNav">
+    <a href="#ch1"><span class="toc-num">01</span> 什么是 Claude Code</a>
+    <a href="#ch2"><span class="toc-num">02</span> 安装与配置</a>
+    <a href="#ch3"><span class="toc-num">03</span> 快速上手（5 分钟）</a>
+    <a href="#ch4"><span class="toc-num">04</span> 所有斜杠命令详解</a>
+    <a href="#ch5"><span class="toc-num">05</span> VS Code 扩展详解</a>
+    <a href="#ch6"><span class="toc-num">06</span> 记忆系统</a>
+    <a href="#ch7"><span class="toc-num">07</span> 设置与配置</a>
+    <a href="#ch8"><span class="toc-num">08</span> 权限系统</a>
+    <a href="#ch9"><span class="toc-num">09</span> 键盘快捷键</a>
+    <a href="#ch10"><span class="toc-num">10</span> MCP 服务器</a>
+    <a href="#ch11"><span class="toc-num">11</span> Hooks 钩子系统</a>
+    <a href="#ch12"><span class="toc-num">12</span> Git 集成</a>
+    <a href="#ch13"><span class="toc-num">13</span> Plan 计划模式</a>
+    <a href="#ch14"><span class="toc-num">14</span> 子代理与工作流</a>
+    <a href="#ch15"><span class="toc-num">15</span> 会话管理</a>
+    <a href="#ch16"><span class="toc-num">16</span> 新手最佳实践</a>
+  </nav>
+  <div class="sidebar-footer">
+    v2026-06-24 · VS Code + CC Switch
+  </div>
+</aside>
+
+<!-- ═══════════════ RIGHT SIDEBAR ═══════════════ -->
+<aside class="right-sidebar" id="rightSidebar"></aside>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<div class="main-wrapper">
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<header class="hero">
+  <h1>🤖 Claude Code 完全使用指南</h1>
+  <p class="subtitle">在 VS Code 中，用 AI 帮你高效写代码</p>
+  <span class="badge">📅 2026-06-24 &nbsp;|&nbsp; 🟢 VS Code 专用 &nbsp;|&nbsp; 🌐 小白友好</span>
+</header>
+
+<!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+<main class="content">
+
+<div class="callout callout-info">
+  <p class="callout-title">🎬 视频教程推荐</p>
+  感谢 B 站博主 <strong>沉默的羔丸voov</strong> 的精彩分享！如果你更喜欢看视频学习，推荐观看：<br>
+  👉 <a href="https://www.bilibili.com/video/BV1ia9UBPESQ/" target="_blank">Claude Code 视频教程（Bilibili）</a>
+</div>
+
+<!-- ── Ch1 ── -->
+<h2 id="ch1">1. 什么是 Claude Code</h2>
+<p><strong>Claude Code</strong> 是 Anthropic 公司开发的一个 <strong>AI 编程助手</strong>。它直接嵌入到 VS Code 中，就像给你配了一个经验丰富的结对程序员，能：</p>
+<ul>
+  <li>📖 <strong>读懂你的代码</strong>：理解整个项目的结构和逻辑</li>
+  <li>✏️ <strong>帮你写代码</strong>：新增功能、修复 Bug、重构代码</li>
+  <li>🔧 <strong>执行命令</strong>：运行测试、安装依赖、操作 Git</li>
+  <li>🔗 <strong>连接外部工具</strong>：Jira、数据库、Slack、Figma 等</li>
+  <li>🤖 <strong>自主完成任务</strong>：你描述需求，它自动读代码、写代码、跑测试、提 PR</li>
+</ul>
+<blockquote>通俗理解：就像有个老程序员坐在你旁边。你说"帮我加个登录功能"，他就自己去读项目代码、写功能、跑测试、提交 commit，你只需要审查结果。</blockquote>
+<p><strong>本指南聚焦：</strong>VS Code 扩展方式使用 Claude Code，配合 <strong>CC Switch</strong> 桌面应用管理多个 AI 账号与 API 提供商。</p>
+
+<!-- ── Ch2 ── -->
+<h2 id="ch2">2. 安装与配置</h2>
+
+<h3>2.1 安装 VS Code 扩展</h3>
+<p>在 VS Code 中按 <code>Ctrl+Shift+X</code> 打开扩展面板，搜索 <strong>"Claude Code"</strong>（发布者为 Anthropic），点击安装。</p>
+<div class="callout callout-info">
+  <p class="callout-title">📌 系统要求</p>
+  VS Code 版本需 1.98.0 或以上。Windows / macOS / Linux 均支持。
+</div>
+
+<h3>2.2 安装 CC Switch（推荐）</h3>
+<p><strong>CC Switch</strong> 是一个<strong>完全免费的开源桌面应用</strong>（GitHub 107K+ Stars），用于统一管理和切换多个 AI 工具的账号配置与 API 提供商。它支持 Claude Code、Claude Desktop、Codex、Gemini CLI 等多款 AI 编程工具。</p>
+
+<h4>它能做什么</h4>
+<ul>
+  <li>🔀 <strong>多账号一键切换：</strong>个人 Pro 账号、公司 Team 账号、第三方 API 提供商随意切换</li>
+  <li>🔗 <strong>本地代理路由：</strong>拦截 AI 工具的 API 请求，转发到不同的 API 提供商（如 DeepSeek、Kimi、GLM 等）</li>
+  <li>📊 <strong>用量仪表盘：</strong>实时追踪 Token 消耗、花费、缓存命中率</li>
+  <li>☁️ <strong>云同步：</strong>通过 WebDAV 或 S3 备份配置，多台电脑同步</li>
+  <li>📝 <strong>会话管理：</strong>跨工具查看和恢复对话历史</li>
+</ul>
+
+<h4>安装方式</h4>
+<p>CC Switch 是独立桌面应用，从 <strong>GitHub Releases</strong> 下载安装：</p>
+<table>
+  <tr><th>平台</th><th>安装方式</th></tr>
+  <tr><td><strong>Windows</strong></td><td>下载 <code>.msi</code>（推荐）或便携版 <code>.zip</code></td></tr>
+  <tr><td><strong>macOS</strong></td><td>下载 <code>.dmg</code>，或 <code>brew install --cask cc-switch</code></td></tr>
+  <tr><td><strong>Linux</strong></td><td><code>.AppImage</code>、<code>.deb</code> 或 <code>.rpm</code></td></tr>
+</table>
+<p>📦 下载地址：<a href="https://github.com/farion1231/cc-switch/releases">github.com/farion1231/cc-switch/releases</a></p>
+
+<div class="callout callout-tip">
+  <p class="callout-title">💡 典型场景</p>
+  白天用公司提供的 API 端点写工作代码，晚上切换到个人 Anthropic 订阅写个人项目。在 CC Switch 里点一下切换，VS Code 中的 Claude Code 自动使用对应的 API 配置，不用改任何配置文件。
+</div>
+
+<h3>2.3 首次登录</h3>
+<ol>
+  <li>安装 Claude Code 扩展后，VS Code 右侧会出现 Claude Code 面板（或按 <code>Ctrl+Esc</code> 调出）</li>
+  <li>首次使用会弹出浏览器让你登录 Claude 账号</li>
+  <li>登录成功后即可开始使用</li>
+</ol>
+<p>如果你安装了 CC Switch 桌面应用，可以通过它切换不同的 Claude 账号或 API 提供商，每个账号的会话和设置相互独立。</p>
+
+<!-- ── Ch3 ── -->
+<h2 id="ch3">3. 快速上手（5 分钟实践）</h2>
+
+<div class="callout callout-tip">
+  <p class="callout-title">🎯 目标</p>
+  跟着下面的步骤，5 分钟内完成第一次 AI 辅助编程体验。你不需要配置任何东西，装好扩展就能开始。
+</div>
+
+<h3>第 1 步：打开 Claude Code</h3>
+<p>在 VS Code 中打开你的项目，按 <code>Ctrl+Esc</code>（或点击编辑器右上角的 ✨ 火花图标），Claude Code 面板会出现在右侧。</p>
+
+<h3>第 2 步：让 Claude 认识你的项目</h3>
+<p>在输入框中输入：</p>
+<pre data-lang="text"><code>帮我分析一下这个项目是做什么的，主要用了哪些技术</code></pre>
+<p>Claude 会自己读取项目文件，给你一个概述。这让你快速确认它"看懂"了你的代码。</p>
+
+<h3>第 3 步：做一个简单修改</h3>
+<p>打开任意一个源码文件，选中一段代码，按 <code>Alt+K</code>（Mac: <code>Option+K</code>）插入引用，然后说：</p>
+<pre data-lang="text"><code>给这段代码加一些注释，解释每个步骤在做什么</code></pre>
+<p>Claude 会修改代码。改动以 VS Code 原生 diff 视图展示——左边是原始代码，右边是修改后。你可以逐条 <strong>接受</strong> 或 <strong>拒绝</strong>。</p>
+
+<h3>第 4 步：让 Claude 帮你查问题</h3>
+<p>输入：</p>
+<pre data-lang="text"><code>这个项目里面有没有明显的 bug 或者代码坏味道？帮我检查一下</code></pre>
+<p>Claude 会扫描代码，列出发现的问题，并给出修复建议。</p>
+
+<h3>第 5 步：用命令完成 Git 操作</h3>
+<p>如果刚才的修改你满意，输入：</p>
+<pre data-lang="text"><code>帮我提交这些修改，写一个清晰的 commit message</code></pre>
+<p>Claude 会生成 commit message 并提交（首次需要你批准 git commit 命令）。</p>
+
+<hr>
+
+<h3>打开 Claude Code 的三种方式</h3>
+<table>
+  <tr><th>方式</th><th>操作</th><th>适合场景</th></tr>
+  <tr><td>快捷键</td><td><code>Ctrl+Esc</code></td><td>最常用，在编辑器和 Claude 间快速切换</td></tr>
+  <tr><td>火花图标</td><td>编辑器右上角的 ✨ 图标</td><td>鼠标操作用户</td></tr>
+  <tr><td>新标签页</td><td><code>Ctrl+Shift+Esc</code></td><td>同时进行多个独立对话</td></tr>
+</table>
+
+<h3>界面布局说明</h3>
+<p>Claude Code 面板通常显示在 VS Code 右侧：</p>
+<ul>
+  <li><strong>对话区：</strong>你和 Claude 的对话内容，支持滚动查看历史</li>
+  <li><strong>输入框：</strong>在底部，输入你的问题或指令，按 <code>Enter</code> 发送</li>
+  <li><strong>状态栏：</strong>显示当前权限模式（default / acceptEdits / plan）、模型名称等</li>
+  <li><strong>命令菜单：</strong>输入 <code>/</code> 查看所有可用命令</li>
+</ul>
+
+<h3>会话中的基本操作</h3>
+<table>
+  <tr><th>操作</th><th>作用</th></tr>
+  <tr><td><code>/help</code></td><td>查看所有可用命令</td></tr>
+  <tr><td><code>/clear</code></td><td>清空对话历史，开始新对话（旧会话保存在历史中）</td></tr>
+  <tr><td><code>Esc</code></td><td>中断 Claude 正在做的操作——发现它跑偏了立刻按</td></tr>
+  <tr><td><code>Shift+Tab</code></td><td>循环切换权限模式（default → acceptEdits → plan）</td></tr>
+</table>
+
+<h3>常用对话方式速览</h3>
+<pre data-lang="text"><code># 理解代码
+"解释一下 @src/utils/auth.js 里面的逻辑"
+"这个函数的参数和返回值分别是什么？"
+
+# 写代码
+"帮我在 @src/api/users.ts 里加一个根据 ID 查用户的接口"
+"写一个表单验证的工具函数，要支持邮箱、手机号、URL 三种校验"
+
+# 改代码
+"把 @app.ts#42-58 这段代码从回调改成 async/await"
+"重构这个类，把长方法拆成几个小方法"
+
+# 修 Bug
+"登录页有个 bug，用户输错密码后页面变空白，帮我找出来并修复"
+
+# Git 操作
+"帮我提交修改"
+"创建一个 PR"</code></pre>
+
+<!-- ── Ch4 ── -->
+<h2 id="ch4">4. 所有斜杠命令详解</h2>
+<p>在输入框中输入 <code>/</code> 就能看到所有可用命令，也可以手动输入完整命令。以下是完整清单：</p>
+
+<h3>设置与配置类</h3>
+<table>
+  <tr><th>命令</th><th>作用</th></tr>
+  <tr><td><code>/init</code></td><td>自动分析项目结构，生成 CLAUDE.md 项目规范文件</td></tr>
+  <tr><td><code>/config [key=value]</code></td><td>打开/修改设置（如 /config model=claude-sonnet-4-6）</td></tr>
+  <tr><td><code>/memory</code></td><td>管理记忆（CLAUDE.md、自动记忆开关等）</td></tr>
+  <tr><td><code>/agents</code></td><td>管理自定义子代理（专用 AI 助手）</td></tr>
+  <tr><td><code>/mcp</code></td><td>管理 MCP 服务器（连接外部工具）</td></tr>
+  <tr><td><code>/hooks</code></td><td>查看钩子配置</td></tr>
+  <tr><td><code>/permissions</code></td><td>管理工具的允许/询问/拒绝规则</td></tr>
+  <tr><td><code>/theme</code></td><td>更换配色主题（light / dark / custom）</td></tr>
+  <tr><td><code>/statusline</code></td><td>自定义状态栏显示内容</td></tr>
+  <tr><td><code>/ide</code></td><td>查看 IDE 连接状态</td></tr>
+  <tr><td><code>/login</code> / <code>/logout</code></td><td>登录 / 登出</td></tr>
+  <tr><td><code>/plugin</code></td><td>管理插件和市场</td></tr>
+</table>
+
+<h3>模型与性能类</h3>
+<table>
+  <tr><th>命令</th><th>作用</th></tr>
+  <tr><td><code>/model [模型名]</code></td><td>切换 AI 模型（不写名字弹选择器）</td></tr>
+  <tr><td><code>/effort [级别]</code></td><td>设置努力级别：low / medium / high / xhigh / max</td></tr>
+  <tr><td><code>/fast [on|off]</code></td><td>切换快速模式</td></tr>
+  <tr><td><code>/advisor [model|off]</code></td><td>启用/关闭顾问工具（第二个模型给建议）</td></tr>
+  <tr><td><code>/thinking</code></td><td>切换深度思考模式</td></tr>
+</table>
+
+<h3>上下文管理类</h3>
+<table>
+  <tr><th>命令</th><th>作用</th></tr>
+  <tr><td><code>/clear [名称]</code></td><td>开始新对话，旧会话保存在 /resume 中</td></tr>
+  <tr><td><code>/compact [说明]</code></td><td>压缩对话历史，释放上下文空间</td></tr>
+  <tr><td><code>/context [all]</code></td><td>可视化显示上下文窗口的使用情况</td></tr>
+  <tr><td><code>/rewind</code></td><td>回退代码和对话到之前的检查点</td></tr>
+  <tr><td><code>/resume [会话]</code></td><td>恢复之前的对话</td></tr>
+  <tr><td><code>/branch [名称]</code></td><td>从当前对话分出一个分支（保留原路，尝试新方向）</td></tr>
+  <tr><td><code>/rename [名称]</code></td><td>重命名当前会话</td></tr>
+  <tr><td><code>/export [文件名]</code></td><td>导出对话为纯文本</td></tr>
+  <tr><td><code>/recap</code></td><td>生成当前会话的一句话总结</td></tr>
+</table>
+
+<h3>代码审查类</h3>
+<table>
+  <tr><th>命令</th><th>作用</th></tr>
+  <tr><td><code>/code-review [级别] [--fix] [--comment]</code></td><td>审查代码差异，找 Bug 和改进机会。--fix 自动修复，--comment 以 PR 评论形式输出</td></tr>
+  <tr><td><code>/simplify</code></td><td>只做代码简化/清理（不找 Bug）</td></tr>
+  <tr><td><code>/review [PR]</code></td><td>审查 GitHub Pull Request</td></tr>
+  <tr><td><code>/security-review</code></td><td>安全审查</td></tr>
+</table>
+
+<h3>并行工作类</h3>
+<table>
+  <tr><th>命令</th><th>作用</th></tr>
+  <tr><td><code>/background [任务]</code></td><td>把当前会话转为后台运行，继续做别的事</td></tr>
+  <tr><td><code>/batch &lt;指令&gt;</code></td><td>把大任务拆成 5-30 个并行子任务</td></tr>
+  <tr><td><code>/fork &lt;指令&gt;</code></td><td>分叉一个子代理，继承当前对话去干活</td></tr>
+  <tr><td><code>/tasks</code></td><td>查看所有后台运行的任务</td></tr>
+</table>
+
+<h3>导航与输出类</h3>
+<table>
+  <tr><th>命令</th><th>作用</th></tr>
+  <tr><td><code>/add-dir &lt;路径&gt;</code></td><td>添加工作目录，让 Claude 能访问更多文件夹</td></tr>
+  <tr><td><code>/cd &lt;路径&gt;</code></td><td>切换当前工作目录</td></tr>
+  <tr><td><code>/diff</code></td><td>打开交互式差异查看器，查看未提交的修改</td></tr>
+  <tr><td><code>/copy [N]</code></td><td>复制上一条 Claude 回复到剪贴板</td></tr>
+  <tr><td><code>/btw &lt;问题&gt;</code></td><td>问一个临时问题，不会加入对话历史（不占上下文）</td></tr>
+  <tr><td><code>/focus</code></td><td>切换聚焦视图（只显示最终回复）</td></tr>
+</table>
+
+<h3>账户与用量类</h3>
+<table>
+  <tr><th>命令</th><th>作用</th></tr>
+  <tr><td><code>/usage</code></td><td>查看会话花费、用量限制和活动统计</td></tr>
+  <tr><td><code>/feedback [报告]</code></td><td>提交反馈或 Bug 报告</td></tr>
+  <tr><td><code>/doctor</code></td><td>诊断安装和设置是否正确</td></tr>
+  <tr><td><code>/release-notes</code></td><td>查看版本更新日志</td></tr>
+  <tr><td><code>/status</code></td><td>显示版本、模型、账户、连接状态</td></tr>
+</table>
+
+<h3>其他</h3>
+<table>
+  <tr><th>命令</th><th>作用</th></tr>
+  <tr><td><code>/plan [描述]</code></td><td>直接进入计划模式</td></tr>
+  <tr><td><code>/goal [条件|clear]</code></td><td>设置目标条件，Claude 一直做到满足为止</td></tr>
+</table>
+
+<!-- ── Ch5 ── -->
+<h2 id="ch5">5. VS Code 扩展详解</h2>
+
+<h3>5.1 核心功能一览</h3>
+<p>VS Code 扩展是 Claude Code 的官方原生界面，把 AI 编程助手无缝嵌入你的日常开发环境：</p>
+
+<div class="table-wrap">
+<table>
+  <tr><th>功能</th><th>说明</th></tr>
+  <tr><td>✨ 火花图标</td><td>编辑器右上角，点击打开 Claude Code，当前打开的文件自动成为上下文</td></tr>
+  <tr><td>@ 文件引用</td><td>输入 <code>@</code> 后跟文件名，自动补全路径。如 <code>@src/auth.ts</code></td></tr>
+  <tr><td>@ 选区引用</td><td>选中代码后按 <code>Alt+K</code>，插入带行号的引用如 <code>@app.ts#5-10</code></td></tr>
+  <tr><td>原生差异视图</td><td>Claude 的代码修改在 VS Code 原生 diff 视图中展示，可逐条接受/拒绝</td></tr>
+  <tr><td>多标签页</td><td>支持同时打开多个独立对话，互不干扰</td></tr>
+  <tr><td>会话历史</td><td>侧边栏可浏览所有历史对话，随时恢复继续</td></tr>
+  <tr><td>诊断共享</td><td>IDE Problems 面板的错误和警告自动共享给 Claude</td></tr>
+  <tr><td>图片支持</td><td>拖拽、粘贴（Ctrl+V）或文件路径引用图片，Claude 能分析截图和设计稿</td></tr>
+  <tr><td>PR 状态</td><td>如果当前分支有开着的 PR，状态栏用颜色标示审查状态</td></tr>
+</table>
+</div>
+
+<h3>5.2 @ 文件引用详解</h3>
+<p>这是 VS Code 扩展最重要的交互方式之一。输入 <code>@</code> 触发自动补全：</p>
+<ul>
+  <li><strong>模糊匹配：</strong>输入 <code>@auth</code> 会匹配所有包含 "auth" 的文件路径</li>
+  <li><strong>目录引用：</strong><code>@src/components</code> 引用整个目录</li>
+  <li><strong>选区引用：</strong>选中代码后按 <code>Alt+K</code>（Mac: <code>Option+K</code>），自动生成 <code>@文件名#行号</code> 格式的引用</li>
+</ul>
+<p><strong>使用示例：</strong></p>
+<pre data-lang="text"><code>"解释 @src/utils/auth.js 里面的逻辑"
+"@src/components 这个目录的结构是什么样的？"
+"帮我把 @app.ts#42-58 这段代码重构一下"</code></pre>
+
+<h3>5.3 差异视图（Diff View）</h3>
+<p>Claude 修改代码后，VS Code 会弹出原生的差异对比视图：</p>
+<ul>
+  <li>左侧是原始代码，右侧是 Claude 修改后的代码</li>
+  <li>绿色高亮 = 新增，红色高亮 = 删除，蓝色高亮 = 修改</li>
+  <li>你可以逐条 <strong>接受 (Accept)</strong> 或 <strong>拒绝 (Reject)</strong> 每个改动</li>
+</ul>
+
+<h3>5.4 多标签页会话</h3>
+<p>VS Code 扩展支持同时打开多个 Claude Code 标签页，每个标签页是一个独立的对话：</p>
+<ul>
+  <li><code>Ctrl+Shift+Esc</code> 打开新标签页</li>
+  <li><code>Ctrl+Shift+T</code> 重新打开刚关闭的会话</li>
+  <li>每个标签页有独立的上下文和历史</li>
+</ul>
+
+<h3>5.5 选中代码发送</h3>
+<p>在编辑器中选中代码，右键菜单选 "发送到 Claude"，或直接按 <code>Ctrl+Esc</code> 打开 Claude 面板，选中的代码会自动作为上下文。</p>
+
+<h3>5.6 配合 CC Switch 使用</h3>
+<p>CC Switch 在后台运行一个<strong>本地代理服务</strong>，自动拦截 Claude Code 的 API 请求，路由到你当前选中的账号/提供商。你在 CC Switch 桌面应用中切换账号后，VS Code 里的 Claude Code 会立即使用新的配置，无需重启。</p>
+<ul>
+  <li>多账号的会话历史、设置、记忆、权限配置<strong>相互独立</strong></li>
+  <li>不同账号可以使用不同的 API 端点（Anthropic 官方、第三方代理、私有部署等）</li>
+  <li>用量仪表盘可以查看每个账号的 Token 消耗和花费</li>
+</ul>
+
+<!-- ── Ch6 ── -->
+<h2 id="ch6">6. 记忆系统</h2>
+<p>Claude Code 有两套记忆机制，让它在不同会话间"记住"你的偏好和项目规范。</p>
+
+<h3>6.1 CLAUDE.md 文件</h3>
+<p>这是你<strong>手动编写</strong>的 Markdown 文件，Claude 每次启动会话都会读取。就像给 Claude 的"项目说明书"。</p>
+<table>
+  <tr><th>层级</th><th>位置</th><th>用途</th></tr>
+  <tr><td>用户全局</td><td><code>~/.claude/CLAUDE.md</code></td><td>个人偏好，所有项目通用</td></tr>
+  <tr><td>项目共享</td><td><code>项目根目录/CLAUDE.md</code> 或 <code>.claude/CLAUDE.md</code></td><td>团队共享的项目规范（可提交 git）</td></tr>
+  <tr><td>个人本地</td><td><code>项目根目录/CLAUDE.local.md</code></td><td>你个人对这个项目的偏好（应加入 .gitignore）</td></tr>
+</table>
+<p><strong>怎么写：</strong></p>
+<ul>
+  <li>保持在 200 行以内（越长越容易被忽略）</li>
+  <li>要具体："使用 2 空格缩进" 而非 "格式写对"</li>
+  <li>包含：构建命令、编码规范、架构决策、测试要求、常见坑</li>
+  <li>不要写：Claude 读代码就能看出来的东西、标准约定</li>
+  <li>运行 <code>/init</code> 让 Claude 自动分析项目并生成初始版本</li>
+</ul>
+
+<h3>6.2 自动记忆</h3>
+<p>Claude 在工作过程中<strong>自动写给自己</strong>的笔记。它会自动记录构建命令、调试心得、架构认知、代码风格等信息，在后续会话中自动参考。</p>
+<p>通过 <code>/memory</code> 命令可以开启或关闭自动记忆。所有记忆文件都是纯文本 Markdown，你随时可以查看和编辑。</p>
+
+<h3>6.3 .claude/rules/ 规则目录</h3>
+<p>大型项目可以把规范拆成分类文件，放在 <code>.claude/rules/</code> 目录下：</p>
+<pre data-lang="text"><code>project/
+  .claude/
+    CLAUDE.md          ← 主项目说明
+    rules/
+      code-style.md    ← 代码风格
+      testing.md       ← 测试规范
+      security.md      ← 安全要求</code></pre>
+<p>还可以用 YAML 前置元数据限定规则只对特定文件生效：</p>
+<pre data-lang="markdown"><code>---
+paths:
+  - "src/api/**/*.ts"
+---
+# API 开发规范
+- 所有端点必须包含输入验证</code></pre>
+
+<!-- ── Ch7 ── -->
+<h2 id="ch7">7. 设置与配置</h2>
+<p>Claude Code 采用<strong>层级覆盖</strong>机制来管理配置，不同位置的配置文件有不同的优先级。</p>
+
+<h3>7.1 配置层级（从低到高）</h3>
+<table>
+  <tr><th>层级</th><th>位置</th><th>影响范围</th></tr>
+  <tr><td><strong>用户</strong></td><td><code>~/.claude/</code></td><td>你的所有项目</td></tr>
+  <tr><td><strong>项目</strong></td><td><code>.claude/</code>（可提交 git）</td><td>所有项目成员</td></tr>
+  <tr><td><strong>本地</strong></td><td><code>.claude/settings.local.json</code>（gitignore）</td><td>只有你、这个项目</td></tr>
+</table>
+
+<h3>7.2 配置文件对照表</h3>
+<table>
+  <tr><th>配置内容</th><th>用户位置</th><th>项目位置</th></tr>
+  <tr><td>设置</td><td><code>~/.claude/settings.json</code></td><td><code>.claude/settings.json</code></td></tr>
+  <tr><td>子代理</td><td><code>~/.claude/agents/</code></td><td><code>.claude/agents/</code></td></tr>
+  <tr><td>MCP 服务器</td><td><code>~/.claude.json</code></td><td><code>.mcp.json</code></td></tr>
+  <tr><td>CLAUDE.md</td><td><code>~/.claude/CLAUDE.md</code></td><td><code>CLAUDE.md</code></td></tr>
+  <tr><td>快捷键</td><td><code>~/.claude/keybindings.json</code></td><td>无</td></tr>
+</table>
+
+<h3>7.3 常用设置项</h3>
+<ul>
+  <li><strong>模型配置：</strong><code>model</code>（默认模型）、<code>fallbackModel</code>（备用模型）、<code>effortLevel</code>（努力级别）</li>
+  <li><strong>行为：</strong><code>autoCompactEnabled</code>（自动压缩上下文）、<code>autoMemoryEnabled</code>（自动记忆开关）、<code>outputStyle</code>（输出风格）</li>
+  <li><strong>权限：</strong><code>permissions.allow</code>（允许列表）、<code>permissions.deny</code>（拒绝列表）、<code>permissions.defaultMode</code>（默认模式）</li>
+</ul>
+<p>使用 <code>/config</code> 命令在会话中直接修改设置，例如 <code>/config model=claude-sonnet-4-6</code>。</p>
+
+<h3>7.4 环境变量配置（API 端点与 Token 认证）</h3>
+<p>如果你需要通过<strong>自定义 API 端点</strong>（比如代理、私有部署）来使用 Claude Code，而不是默认连接 Anthropic 官方 API，你需要在配置文件中设置环境变量。</p>
+
+<h4>配置方式</h4>
+<p>在 <code>.claude/settings.json</code>（或 <code>~/.claude/settings.json</code> 全局配置）中添加 <code>env</code> 字段：</p>
+<pre data-lang="json"><code>{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://你的API端点地址",
+    "ANTHROPIC_AUTH_TOKEN": "你的认证Token"
+  }
+}</code></pre>
+
+<h4>这两个变量分别是什么</h4>
+<table>
+  <tr><th>变量名</th><th>作用</th><th>示例值</th></tr>
+  <tr><td><code>ANTHROPIC_BASE_URL</code></td><td>指定 Claude API 的基础地址。如果你用的是代理、中转服务或私有部署，这里填对应的 URL</td><td><code>https://api.example.com</code></td></tr>
+  <tr><td><code>ANTHROPIC_AUTH_TOKEN</code></td><td>API 认证 Token。如果不使用浏览器 OAuth 登录，而是用 Token 直接认证，就填在这里</td><td><code>sk-ant-xxxx</code></td></tr>
+</table>
+
+<h4>常见使用场景</h4>
+<ul>
+  <li>🔗 <strong>API 代理/中转：</strong>公司或团队搭建了统一的 API 网关，所有请求通过代理转发</li>
+  <li>🏢 <strong>私有部署：</strong>使用 Anthropic 的私有云部署端点</li>
+  <li>🔑 <strong>Token 认证：</strong>使用 API Key 而非浏览器登录（如 CI/CD 环境、无头服务器等）</li>
+</ul>
+
+<h4>完整配置示例</h4>
+<p>一个典型的 settings.local.json（不提交 git，只对你生效）：</p>
+<pre data-lang="json"><code>{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://your-proxy.example.com",
+    "ANTHROPIC_AUTH_TOKEN": "sk-ant-api03-your-token-here"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint)",
+      "Bash(npm run test *)"
+    ]
+  }
+}</code></pre>
+
+<div class="callout callout-warn">
+  <p class="callout-title">⚠️ 安全提醒</p>
+  <strong>千万不要</strong>把包含真实 Token 的 settings.json 提交到 git 仓库！建议把 <code>env</code> 配置放在 <code>.claude/settings.local.json</code>（自动被 gitignore），或者放在用户全局配置 <code>~/.claude/settings.json</code> 中。
+</div>
+
+<div class="callout callout-info">
+  <p class="callout-title">💡 配合 CC Switch</p>
+  如果你用了 CC Switch 管理多个账号/API 提供商，每个提供商可以在 CC Switch 中配置各自的 URL 和 Token。切换提供商后，Claude Code 自动使用对应的端点，不需要手动改 settings.json。
+</div>
+
+<h4>怎么确认配置生效</h4>
+<p>配置完后，在 Claude Code 中输入 <code>/status</code>，查看显示的信息中是否使用了你配置的端点地址。如果配置不正确，Claude Code 会提示连接失败。</p>
+
+<h3>7.5 实战：使用 DeepSeek V4 模型</h3>
+<p>Claude Code 支持通过自定义 API 端点接入第三方模型。以下介绍如何通过 <strong>CC Switch</strong> 或直接配置 <code>settings.json</code> 的方式，让 Claude Code 使用 <strong>DeepSeek V4</strong> 模型。</p>
+
+<h4>方式一：通过 CC Switch 添加 DeepSeek V4 Pro API</h4>
+<ol>
+  <li>打开 CC Switch 桌面应用</li>
+  <li>点击左侧 <strong>"提供商管理"</strong> 或 <strong>"Add Provider"</strong></li>
+  <li>填写以下信息：
+    <ul>
+      <li><strong>名称：</strong>DeepSeek V4（自定义，方便识别）</li>
+      <li><strong>API 端点：</strong><code>https://api.deepseek.com</code>（或你的 DeepSeek Pro API 地址）</li>
+      <li><strong>API Key：</strong>你的 DeepSeek API Key（在 DeepSeek 平台获取）</li>
+    </ul>
+  </li>
+  <li>保存后，在 CC Switch 主界面<strong>切换到 DeepSeek V4</strong> 提供商</li>
+  <li>VS Code 中的 Claude Code 会自动使用 DeepSeek V4 的 API 端点，无需重启</li>
+</ol>
+
+<h4>方式二：直接在 VS Code 中配置 settings.json</h4>
+<p>如果你不使用 CC Switch，也可以直接在 Claude Code 的设置文件中配置。打开 <code>.claude/settings.local.json</code>（项目级，不提交 git）或 <code>~/.claude/settings.json</code>（全局），添加环境变量：</p>
+<pre data-lang="json"><code>{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://api.deepseek.com",
+    "ANTHROPIC_AUTH_TOKEN": "your-deepseek-api-key"
+  }
+}</code></pre>
+
+<p><strong>参数说明：</strong></p>
+<table>
+  <tr><th>参数</th><th>填什么</th><th>示例</th></tr>
+  <tr><td><code>ANTHROPIC_BASE_URL</code></td><td>DeepSeek V4 的 API 地址</td><td><code>https://api.deepseek.com</code></td></tr>
+  <tr><td><code>ANTHROPIC_AUTH_TOKEN</code></td><td>你在 DeepSeek 平台申请的 API Key</td><td><code>sk-xxxxxxxxxxxxxxxx</code></td></tr>
+</table>
+
+<h4>配置完成后验证</h4>
+<ol>
+  <li>在 VS Code 中打开 Claude Code 面板（<code>Ctrl+Esc</code>）</li>
+  <li>输入 <code>/status</code> 查看当前连接的 API 端点是否已切换为 DeepSeek 地址</li>
+  <li>随便问一个问题，确认能正常响应</li>
+</ol>
+
+<div class="callout callout-tip">
+  <p class="callout-title">💡 DeepSeek V4 的优势</p>
+  DeepSeek V4 是一款高性能国产大模型，支持超长上下文、代码生成能力强，且 API 价格相对低廉。适合个人开发者在 Claude Code 中作为日常编码模型使用。
+</div>
+
+<div class="callout callout-warn">
+  <p class="callout-title">⚠️ 注意事项</p>
+  <ul>
+    <li>DeepSeek API Key 不要提交到 git 仓库，建议使用 <code>settings.local.json</code> 或全局配置</li>
+    <li>不同第三方 API 提供商的兼容性可能不同，如遇到问题可切换回 Anthropic 官方 API 对比排查</li>
+    <li>CC Switch 方式切换更方便，支持一键在多个提供商之间来回切换</li>
+  </ul>
+</div>
+
+<!-- ── Ch8 ── -->
+<h2 id="ch8">8. 权限系统</h2>
+<p>Claude Code 对不同操作有不同的安全级别，保护你的代码和数据安全。</p>
+
+<h3>8.1 默认安全级别</h3>
+<table>
+  <tr><th>工具类型</th><th>例子</th><th>默认行为</th></tr>
+  <tr><td><strong>只读</strong></td><td>读文件、搜索代码</td><td>不需要批准</td></tr>
+  <tr><td><strong>命令执行</strong></td><td>运行 npm、git 等命令</td><td>需要批准</td></tr>
+  <tr><td><strong>文件修改</strong></td><td>编辑、写入文件</td><td>需要批准</td></tr>
+</table>
+
+<h3>8.2 三种权限规则</h3>
+<ul>
+  <li><strong>Allow（允许）：</strong>自动批准，不弹窗问你</li>
+  <li><strong>Ask（询问）：</strong>每次都弹窗让你确认</li>
+  <li><strong>Deny（拒绝）：</strong>直接阻止，绝对不执行</li>
+</ul>
+
+<h3>8.3 权限模式</h3>
+<p>按 <code>Shift+Tab</code> 循环切换模式，状态栏会显示当前模式：</p>
+<table>
+  <tr><th>模式</th><th>自动批准</th><th>适合场景</th></tr>
+  <tr><td><code>default</code></td><td>只读</td><td>上手阶段、敏感项目</td></tr>
+  <tr><td><code>acceptEdits</code></td><td>只读 + 文件编辑</td><td>正常写代码（推荐日常使用）</td></tr>
+  <tr><td><code>plan</code></td><td>只读，不可编辑</td><td>先探索再动手</td></tr>
+  <tr><td><code>auto</code></td><td>几乎所有（有安全检查）</td><td>长时间自主任务</td></tr>
+</table>
+
+<h3>8.4 配置白名单/黑名单</h3>
+<p>在 <code>.claude/settings.json</code> 中配置：</p>
+<pre data-lang="json"><code>{
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint)",
+      "Bash(npm run test *)",
+      "Bash(git status)"
+    ],
+    "deny": [
+      "Bash(curl *)",
+      "Read(./.env*)",
+      "Read(./secrets/**)"
+    ]
+  }
+}</code></pre>
+
+<div class="callout callout-warn">
+  <p class="callout-title">⚠️ 受保护路径</p>
+  <code>.git</code>、<code>.claude</code>、<code>.vscode</code>、<code>.gitconfig</code>、<code>.bashrc</code>、<code>.envrc</code> 等敏感文件和目录永远不能自动写入。
+</div>
+
+<!-- ── Ch9 ── -->
+<h2 id="ch9">9. 键盘快捷键</h2>
+
+<h3>9.1 VS Code 中的 Claude Code 快捷键</h3>
+<table>
+  <tr><th>快捷键</th><th>功能</th></tr>
+  <tr><td><code>Ctrl+Esc</code></td><td>打开 / 在编辑器和 Claude 间切换焦点</td></tr>
+  <tr><td><code>Ctrl+Shift+Esc</code></td><td>打开一个新的 Claude Code 会话标签页</td></tr>
+  <tr><td><code>Alt+K</code>（Mac: <code>Option+K</code>）</td><td>插入带文件路径和行号的 @ 引用</td></tr>
+  <tr><td><code>Ctrl+Shift+T</code></td><td>重新打开刚关闭的会话标签页</td></tr>
+  <tr><td><code>Ctrl+N</code></td><td>新建对话（需在设置中启用）</td></tr>
+</table>
+
+<h3>9.2 对话中的快捷键</h3>
+<table>
+  <tr><th>快捷键</th><th>功能</th></tr>
+  <tr><td><code>Enter</code></td><td>发送消息</td></tr>
+  <tr><td><code>Shift+Tab</code></td><td>循环切换权限模式</td></tr>
+  <tr><td><code>Ctrl+J</code></td><td>插入换行（不发送）</td></tr>
+  <tr><td><code>Ctrl+V</code></td><td>粘贴剪贴板图片</td></tr>
+</table>
+
+<h3>9.3 快速操作</h3>
+<table>
+  <tr><th>快捷键</th><th>功能</th></tr>
+  <tr><td><code>Ctrl+O</code></td><td>打开对话记录查看器（查看详细工具调用）</td></tr>
+  <tr><td><code>Ctrl+T</code></td><td>切换任务列表</td></tr>
+  <tr><td><code>Esc</code></td><td>中断 Claude 正在做的操作</td></tr>
+</table>
+
+<!-- ── Ch10 ── -->
+<h2 id="ch10">10. MCP 服务器</h2>
+<p><strong>MCP（Model Context Protocol，模型上下文协议）</strong>是一个开放标准，让 Claude Code 能连接各种外部工具和数据源。</p>
+
+<h3>10.1 什么场景需要用 MCP</h3>
+<ul>
+  <li>📄 读取 Google Drive 中的设计文档</li>
+  <li>🎫 自动更新 Jira 工单状态</li>
+  <li>🗄️ 直接查询 PostgreSQL / MySQL 数据库</li>
+  <li>🎨 集成 Figma 设计稿，对照设计写 UI</li>
+  <li>💬 发送 Slack 消息通知</li>
+  <li>📊 对接 Sentry、Datadog 等监控工具排查问题</li>
+</ul>
+
+<h3>10.2 配置方式</h3>
+<p>在项目根目录创建 <code>.mcp.json</code> 文件（可以提交 git，团队成员共享），或者用 <code>/mcp</code> 命令在会话中管理。</p>
+<p>有三种作用范围：</p>
+<table>
+  <tr><th>范围</th><th>配置文件</th><th>谁可见</th></tr>
+  <tr><td><strong>本地</strong></td><td><code>.mcp.json</code>（项目根目录）</td><td>当前项目，只有你的机器</td></tr>
+  <tr><td><strong>项目</strong></td><td><code>.mcp.json</code>（提交到 git）</td><td>团队所有成员</td></tr>
+  <tr><td><strong>用户</strong></td><td><code>~/.claude.json</code></td><td>你所有项目通用</td></tr>
+</table>
+<div class="callout callout-tip">
+  <p class="callout-title">💡 新手提示</p>
+  刚开始用建议先不配置 MCP，Claude Code 本身的功能已经足够强大。当你需要让 Claude 直接操作数据库或更新 Jira 工单时，再来配置 MCP。
+</div>
+
+<!-- ── Ch11 ── -->
+<h2 id="ch11">11. Hooks 钩子系统</h2>
+<p><strong>钩子（Hooks）</strong>是在 Claude Code 执行特定操作时<strong>自动触发</strong>的自定义脚本。适合高级用户做自动化定制。</p>
+
+<h3>11.1 常见使用场景</h3>
+<ul>
+  <li>每次 Claude 执行 Bash 命令前做安全检查</li>
+  <li>每次 Claude 修改完代码后自动跑测试</li>
+  <li>收到通知时弹出桌面提醒</li>
+  <li>禁止 Claude 执行某些危险操作</li>
+</ul>
+
+<h3>11.2 主要触发时机</h3>
+<table>
+  <tr><th>时机</th><th>说明</th></tr>
+  <tr><td><code>SessionStart</code></td><td>会话开始时触发</td></tr>
+  <tr><td><code>UserPromptSubmit</code></td><td>你提交问题前触发（可以阻止）</td></tr>
+  <tr><td><code>PreToolUse</code></td><td>工具执行前触发（最关键——可以拦截、修改输入）</td></tr>
+  <tr><td><code>PostToolUse</code></td><td>工具执行成功后触发</td></tr>
+  <tr><td><code>Stop</code></td><td>Claude 回复完后触发</td></tr>
+</table>
+
+<div class="callout callout-info">
+  <p class="callout-title">📌 新手注意</p>
+  Hooks 是进阶功能，刚上手时不需要配置。等用熟了，有自动化需求时再回头看。
+</div>
+
+<!-- ── Ch12 ── -->
+<h2 id="ch12">12. Git 集成</h2>
+<p>Claude Code 深度集成 Git，你可以在对话中用自然语言操作版本控制：</p>
+<pre data-lang="text"><code>"帮我提交修改，写一个清晰的 commit message"
+"创建一个新分支 feature/quickstart"
+"显示最近 5 条 commit"
+"帮我解决合并冲突"
+"创建一个 PR"</code></pre>
+
+<h3>12.1 PR 关联</h3>
+<p>创建 PR 后，Claude Code 会自动把当前会话关联到这个 PR。当你回到这个会话时，Claude 知道对应的 PR 是什么，可以直接继续工作。</p>
+
+<h3>12.2 差异查看</h3>
+<p>输入 <code>/diff</code> 打开交互式差异查看器，VS Code 原生 diff 视图中显示所有未提交的修改，方便你在提交前检查。</p>
+
+<h3>12.3 PR 审查状态</h3>
+<p>如果你当前分支有打开的 PR，VS Code 底部状态栏会显示 PR 的审查状态（绿色 = 已批准，黄色 = 待处理，红色 = 要求修改，灰色 = 草稿）。</p>
+
+<!-- ── Ch13 ── -->
+<h2 id="ch13">13. Plan 计划模式</h2>
+<p><strong>计划模式</strong>让 Claude <strong>只调研、写计划、不动代码</strong>。适合你不确定怎么改、需要先理清思路的场景。</p>
+
+<h3>13.1 进入计划模式</h3>
+<ul>
+  <li>按 <code>Shift+Tab</code> 直到状态栏显示 "plan mode"</li>
+  <li>或在输入框输入 <code>/plan 我想加一个 OAuth 登录功能</code></li>
+</ul>
+
+<h3>13.2 计划完成后</h3>
+<p>Claude 写完计划后会问你怎么做：</p>
+<ul>
+  <li><strong>批准，全自动执行</strong> — Claude 自己改代码、跑测试</li>
+  <li><strong>批准，文件编辑自动，其余手动确认</strong></li>
+  <li><strong>批准，每条修改都让我审核</strong> — 最安全</li>
+  <li><strong>继续打磨计划</strong> — 你觉得方案不够好，让它改</li>
+</ul>
+
+<div class="callout callout-tip">
+  <p class="callout-title">💡 什么时候用计划模式？</p>
+  <strong>要用的场景：</strong>涉及多文件的大改动、不熟悉要改的代码、不确定最佳方案。<br>
+  <strong>不需要的场景：</strong>改个错别字、加一行日志、修一个已知的小 bug。
+</div>
+
+<!-- ── Ch14 ── -->
+<h2 id="ch14">14. 子代理与工作流</h2>
+
+<h3>14.1 什么是子代理</h3>
+<p>子代理是<strong>专门的 AI 助手</strong>，在<strong>自己独立的上下文窗口</strong>中运行。你可以把一些费时的探索、分析工作交给子代理，它不会占用主对话的上下文空间。</p>
+<p><strong>为什么需要子代理：</strong></p>
+<ul>
+  <li>🔒 <strong>隔离上下文：</strong>让子代理去读大量文件做研究，不影响主对话</li>
+  <li>🎯 <strong>专注特定任务：</strong>可以给子代理专门的指令和工具权限</li>
+  <li>💰 <strong>控制成本：</strong>简单任务可以用便宜模型（如 Haiku）</li>
+</ul>
+
+<h3>14.2 内置子代理</h3>
+<ul>
+  <li><strong>Explore</strong> — 搜索代码库，回答代码问题</li>
+  <li><strong>Plan</strong> — 创建详细的实现计划</li>
+</ul>
+
+<h3>14.3 使用子代理</h3>
+<pre data-lang="text"><code>"用一个子代理去研究我们的认证系统怎么处理 token 刷新的"
+"用子代理审查这段代码有没有边界情况"</code></pre>
+
+<h3>14.4 Fork 分叉</h3>
+<p><code>/fork &lt;指令&gt;</code> 生成一个继承当前对话的子代理去干活，你可以继续做别的事，它完成后结果返回给你。</p>
+
+<h3>14.5 Batch 批量处理</h3>
+<p><code>/batch &lt;指令&gt;</code> 把一个大改动拆成 5-30 个独立单元，每个在一个隔离环境里并行实现。</p>
+
+<!-- ── Ch15 ── -->
+<h2 id="ch15">15. 会话管理</h2>
+
+<h3>15.1 什么是会话</h3>
+<p>每次你和 Claude Code 的对话就是一个<strong>会话</strong>。会话会自动保存，你可以随时恢复之前的对话继续未完成的工作。</p>
+
+<h3>15.2 在 VS Code 中管理会话</h3>
+<p>VS Code 扩展提供了图形化的会话管理：</p>
+<ul>
+  <li><strong>侧边栏历史：</strong>左侧面板可以看到所有历史会话，点击恢复</li>
+  <li><strong>搜索会话：</strong>按关键词搜索之前的对话</li>
+  <li><strong>重命名：</strong>给会话起个好名字，方便以后找（选中后按 <code>Ctrl+R</code>）</li>
+  <li><strong>多标签页：</strong>同时打开多个会话标签页处理不同任务</li>
+</ul>
+
+<h3>15.3 上下文管理</h3>
+<p>随着对话变长，上下文窗口会逐渐被占满。几个管理技巧：</p>
+<table>
+  <tr><th>命令</th><th>作用</th></tr>
+  <tr><td><code>/clear</code></td><td>开始新对话，旧会话保留在历史中可随时恢复</td></tr>
+  <tr><td><code>/compact</code></td><td>让 Claude 压缩对话历史，总结关键信息释放空间</td></tr>
+  <tr><td><code>/context</code></td><td>可视化查看上下文窗口占用了多少</td></tr>
+  <tr><td><code>/rewind</code></td><td>回退代码和对话到之前的检查点</td></tr>
+  <tr><td><code>/branch 名称</code></td><td>复制当前对话到新分支（原对话保留，尝试新方向）</td></tr>
+</table>
+
+<h3>15.4 后台任务</h3>
+<p><code>/background [任务]</code> 把当前耗时任务放到后台，你可以继续其他工作。完成后会通知你。</p>
+
+<!-- ── Ch16 ── -->
+<h2 id="ch16">16. 新手最佳实践</h2>
+
+<h3>1. 始终给 Claude 一个验证方法 🎯</h3>
+<p><strong>这是最重要的建议。</strong>告诉 Claude 怎么验证自己写对了：</p>
+<pre data-lang="text"><code>"写一个 validateEmail 函数。
+测试用例：user@example.com 应该返回 true，invalid 应该返回 false。
+写完跑一下测试，确保通过。"</code></pre>
+
+<h3>2. 先探索，再做计划，最后写代码 📋</h3>
+<ol>
+  <li><strong>探索：</strong>"先读一下 /src/auth 目录，理解我们的认证逻辑"</li>
+  <li><strong>计划：</strong>进计划模式，"/plan 我想加 Google OAuth，要改哪些文件？"</li>
+  <li><strong>实现：</strong>退出计划模式，"按你的计划实现 OAuth 流程"</li>
+  <li><strong>提交：</strong>"写个清晰的 commit message 并提 PR"</li>
+</ol>
+<p>小任务直接干，不用每次都计划。</p>
+
+<h3>3. 需求要具体 ✍️</h3>
+<ul>
+  <li>❌ "修一下 bug"</li>
+  <li>✅ "修复登录页的 bug：用户输错密码后页面变空白，应该显示错误提示。相关文件在 @src/Login.tsx"</li>
+</ul>
+
+<h3>4. 善用 @ 引用 📎</h3>
+<p>输入 <code>@</code> 加文件名，比描述文件在哪快得多。选代码后 <code>Alt+K</code> 直接带行号引用。给 Claude 精确的上下文是得到好结果的关键。</p>
+
+<h3>5. 积极管理上下文 🧹</h3>
+<ul>
+  <li>不相关的任务之间 <code>/clear</code> 一下</li>
+  <li>临时小问题用 <code>/btw</code>，不占主对话空间</li>
+  <li>大型代码探索交给子代理</li>
+  <li>对话太长时用 <code>/compact</code> 压缩一下</li>
+</ul>
+
+<h3>6. 写好 CLAUDE.md 📝</h3>
+<p>运行 <code>/init</code> 自动生成，然后逐步打磨。保持在 200 行以内。只写 Claude 读代码看不出来的东西（构建命令、项目规范、常见坑）。</p>
+
+<h3>7. 建立权限白名单 ✅</h3>
+<p>第十次批准 <code>npm run lint</code> 时你应该已经烦了。在设置里加到 allow 列表：</p>
+<pre data-lang="json"><code>{
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint)",
+      "Bash(npm run test *)",
+      "Bash(git status)"
+    ]
+  }
+}</code></pre>
+
+<h3>8. 从粗到细提问 🔍</h3>
+<p>接触新代码库时，按这个顺序问：</p>
+<ol>
+  <li>"给我一个这个项目的整体概览"</li>
+  <li>"讲解一下主要的架构模式"</li>
+  <li>"认证是怎么处理的？"</li>
+  <li>"找到处理用户认证的文件，帮我加个 token 刷新"</li>
+</ol>
+
+<h3>9. 及时纠偏 🛑</h3>
+<p>发现 Claude 跑偏了，立刻按 <code>Esc</code> 中断。好结果是靠紧密的反馈循环，不是完美的首次尝试。</p>
+
+<h3>10. 避免常见错误 ⚠️</h3>
+<table>
+  <tr><th>错误</th><th>症状</th><th>解决方法</th></tr>
+  <tr><td><strong>大杂烩会话</strong></td><td>一个会话里做一堆不相关的事</td><td><code>/clear</code> 隔开</td></tr>
+  <tr><td><strong>反复纠正</strong></td><td>同样问题纠正 3 次以上</td><td><code>/clear</code> + 重写更清楚的提示</td></tr>
+  <tr><td><strong>CLAUDE.md 太啰嗦</strong></td><td>Claude 好像不听话</td><td>砍到 200 行以内</td></tr>
+  <tr><td><strong>信了就过</strong></td><td>代码看着对但边界情况漏了</td><td>始终提供验证方式</td></tr>
+  <tr><td><strong>无限探索</strong></td><td>"研究一下 X" 读了上百文件</td><td>限定范围或交给子代理</td></tr>
+  <tr><td><strong>不设白名单</strong></td><td>每次操作都要点批准</td><td>把安全操作加入 allow</td></tr>
+</table>
+
+<h3>11. 用好状态栏和 CC Switch 📊</h3>
+<ul>
+  <li>运行 <code>/statusline</code> 自定义状态栏，显示上下文用量、花费、模型信息</li>
+  <li>CC Switch 桌面应用管理多账号/多提供商，工作/个人项目一键切换互不干扰</li>
+</ul>
+
+<!-- ═══════════════ SUMMARY ═══════════════ -->
+<hr>
+<h2>总结</h2>
+<blockquote>Claude Code 是你在 VS Code 里的 AI 副驾驶——帮你读代码、写功能、修 Bug、做审查。你用自然语言指挥它，它帮你执行。</blockquote>
+<p>对于新手，记住这五步：</p>
+<ol>
+  <li><strong>装好扩展</strong> → VS Code 商店搜 "Claude Code"，装好即用</li>
+  <li><strong>先读代码</strong> → 让 Claude 帮你理解项目结构和逻辑</li>
+  <li><strong>小改起手</strong> → 从修 typo、加注释开始建立信任</li>
+  <li><strong>逐步放手</strong> → 熟悉后让它自己写功能、跑测试、提 PR</li>
+  <li><strong>及时中断</strong> → 发现不对按 <code>Esc</code>，纠偏后继续</li>
+</ol>
+<p style="text-align:center;font-size:1.2em;margin-top:20px;"><strong>方向盘始终在你手里，Claude 是帮你踩油门的副驾驶。</strong></p>
+
+</main>
+
+<footer>
+  <p>📖 官方文档：<a href="https://code.claude.com/docs">code.claude.com/docs</a> &nbsp;|&nbsp;
+  🚀 快速入门：<a href="https://code.claude.com/docs/en/quickstart">code.claude.com/docs/en/quickstart</a></p>
+  <p>📦 CC Switch：<a href="https://github.com/farion1231/cc-switch/releases">github.com/farion1231/cc-switch/releases</a></p>
+  <p style="margin-top:6px;">最后更新：2026-06-24 &nbsp;|&nbsp; VS Code 专用指南 &nbsp;|&nbsp; 配合 CC Switch 使用</p>
+</footer>
+
+</div><!-- /main-wrapper -->
+
+<script>
+  /* ═══════════ SIDEBAR ACTIVE STATE ═══════════ */
+  const sidebarLinks = document.querySelectorAll('.sidebar-nav a');
+  const headings = [];
+
+  // Collect all heading positions
+  sidebarLinks.forEach(link => {
+    const id = link.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) headings.push({ id, el, link });
+  });
+
+  function updateActive() {
+    let current = headings[0];
+    const scrollTop = window.scrollY + 80; // offset
+    for (const h of headings) {
+      if (h.el.offsetTop <= scrollTop) current = h;
+      else break;
+    }
+    sidebarLinks.forEach(a => a.classList.remove('active'));
+    if (current) current.link.classList.add('active');
+  }
+
+  window.addEventListener('scroll', updateActive, { passive: true });
+  updateActive();
+
+  /* ═══════════ MOBILE SIDEBAR TOGGLE ═══════════ */
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  function toggleSidebar() {
+    sidebar.classList.toggle('open');
+    overlay.style.display = sidebar.classList.contains('open') ? 'block' : 'none';
+  }
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.style.display = 'none';
+  }
+
+  // Close sidebar when clicking a link (mobile)
+  sidebarLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 900) closeSidebar();
+    });
+  });
+
+  // Expose to global scope for inline onclick
+  window.toggleSidebar = toggleSidebar;
+  window.closeSidebar = closeSidebar;
+</script>
+<script src="../../assets/components.js"></script>
+<a href="../../" class="home-btn" title="返回首页" style="position:fixed;bottom:30px;left:30px;width:46px;height:46px;border-radius:12px;background:#34d399;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.3em;z-index:100;text-decoration:none;box-shadow:0 8px 24px rgba(52,211,153,.3);transition:all .3s;"><i class="ri-home-4-line"></i></a>
+
+</body>
+</html>

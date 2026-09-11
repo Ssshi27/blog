@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ssshi27's Blog</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✍️</text></svg>" type="image/svg+xml">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" rel="stylesheet">
+<style>
+  :root { --accent: #818cf8; --accent2: #34d399; --accent3: #fbbf24; --bg-card: #161b22; --border: #21262d; }
+  body { background: #0d1117; color: #e6edf3; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif; }
+
+  /* ═══ Particles ═══ */
+  #particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+  /* ═══ Hero ═══ */
+  .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; }
+  .hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 20%, rgba(129,140,248,.12) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(52,211,153,.06) 0%, transparent 50%); pointer-events: none; }
+
+  .avatar-ring { width: 140px; height: 140px; border-radius: 50%; padding: 4px; background: linear-gradient(135deg, #667eea, #764ba2, #f093fb); animation: spin 8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .avatar-inner { width: 100%; height: 100%; border-radius: 50%; background: #0d1117; display: flex; align-items: center; justify-content: center; font-size: 3.5em; animation: counter-spin 8s linear infinite; }
+  @keyframes counter-spin { to { transform: rotate(-360deg); } }
+
+  .hero-title { font-size: clamp(2.5em, 6vw, 4em); font-weight: 900; background: linear-gradient(135deg, #fbbf24 0%, #818cf8 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: -0.03em; }
+  .hero-sub { color: #8b949e; font-size: 1.15em; }
+
+  .typewriter { color: var(--accent3); font-size: 1.05em; min-height: 1.5em; }
+  .cursor { display: inline-block; width: 2px; height: 1em; background: var(--accent3); vertical-align: text-bottom; animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ═══ Stats Card ═══ */
+  .stats-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 24px 32px; backdrop-filter: blur(10px); }
+  .stat-value { font-size: 2em; font-weight: 800; line-height: 1; }
+  .stat-label { font-size: .8em; color: #8b949e; margin-top: 4px; }
+
+  /* ═══ Social ═══ */
+  .social-icon { width: 48px; height: 48px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.3em; background: var(--bg-card); border: 1px solid var(--border); color: #8b949e; transition: all .3s; }
+  .social-icon:hover { color: #fff; border-color: var(--accent); background: rgba(129,140,248,.1); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(129,140,248,.2); }
+
+  /* ═══ Section ═══ */
+  .section { position: relative; z-index: 1; }
+  .section-title { font-size: 1.6em; font-weight: 800; display: flex; align-items: center; gap: 12px; }
+  .section-title i { color: var(--accent); font-size: 1.2em; }
+  .section-line { flex: 1; height: 1px; background: linear-gradient(90deg, var(--accent), transparent); }
+
+  /* ═══ Post Cards ═══ */
+  .post-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 28px 32px; transition: all .3s cubic-bezier(.4,0,.2,1); position: relative; overflow: hidden; }
+  .post-card::before { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: linear-gradient(180deg, var(--accent), var(--accent2)); opacity: 0; transition: opacity .3s; }
+  .post-card:hover { border-color: rgba(129,140,248,.4); transform: translateY(-6px); box-shadow: 0 20px 60px rgba(0,0,0,.3), 0 0 40px rgba(129,140,248,.08); }
+  .post-card:hover::before { opacity: 1; }
+  .post-card a { text-decoration: none; color: inherit; display: block; }
+  .post-title { font-size: 1.3em; font-weight: 700; transition: color .3s; }
+  .post-card:hover .post-title { color: var(--accent); }
+  .post-desc { color: #8b949e; font-size: .92em; margin: 10px 0 16px; }
+  .post-meta { color: #484f58; font-size: .82em; }
+
+  .tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 20px; font-size: .75em; font-weight: 500; border: 1px solid; }
+  .tag-purple { color: #a78bfa; border-color: rgba(167,139,250,.3); background: rgba(167,139,250,.06); }
+  .tag-green { color: #34d399; border-color: rgba(52,211,153,.3); background: rgba(52,211,153,.06); }
+  .tag-yellow { color: #fbbf24; border-color: rgba(251,191,36,.3); background: rgba(251,191,36,.06); }
+  .tag-blue { color: #60a5fa; border-color: rgba(96,165,250,.3); background: rgba(96,165,250,.06); }
+  .tag-pink { color: #f472b6; border-color: rgba(244,114,182,.3); background: rgba(244,114,182,.06); }
+
+  /* ═══ Scroll indicator ═══ */
+  .scroll-down { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); color: #484f58; font-size: 1.8em; animation: bounce2 2s infinite; cursor: pointer; }
+  @keyframes bounce2 { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-8px); } }
+
+  /* ═══ Footer ═══ */
+  footer { border-top: 1px solid var(--border); color: #484f58; }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* ═══ Back top ═══ */
+  .back-top { position: fixed; bottom: 30px; right: 30px; width: 46px; height: 46px; border-radius: 12px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2em; z-index: 100; opacity: 0; transform: translateY(20px); transition: all .3s; cursor: pointer; border: none; box-shadow: 0 8px 24px rgba(129,140,248,.3); }
+  .back-top.show { opacity: 1; transform: translateY(0); }
+  .back-top:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(129,140,248,.4); }
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<section class="hero">
+  <div class="text-center position-relative" style="z-index:1">
+    <div class="avatar-ring mx-auto mb-4 animate__animated animate__fadeInDown">
+      <div class="avatar-inner">👨‍💻</div>
+    </div>
+    <h1 class="hero-title mb-2 animate__animated animate__fadeInUp">Ssshi27</h1>
+    <p class="hero-sub mb-2 animate__animated animate__fadeInUp" style="animation-delay:.2s">记录学习 · 分享技术 · 探索 AI</p>
+    <div class="typewriter mb-4 animate__animated animate__fadeIn" style="animation-delay:.6s"><span id="typed"></span><span class="cursor"></span></div>
+
+    <div class="d-flex justify-content-center gap-3 mb-4 animate__animated animate__fadeInUp" style="animation-delay:.4s">
+      <a href="https://github.com/Ssshi27" target="_blank" class="social-icon"><i class="ri-github-fill"></i></a>
+      <a href="mailto:ssshi27@example.com" class="social-icon"><i class="ri-mail-line"></i></a>
+      <a href="#posts" class="social-icon"><i class="ri-article-line"></i></a>
+    </div>
+
+    <div class="stats-card d-inline-flex gap-5 animate__animated animate__fadeInUp" style="animation-delay:.5s">
+      <div class="text-center"><div class="stat-value text-primary">2</div><div class="stat-label">文章</div></div>
+      <div class="text-center"><div class="stat-value text-success">5</div><div class="stat-label">标签</div></div>
+      <div class="text-center"><div class="stat-value text-warning">2026</div><div class="stat-label">起始</div></div>
+    </div>
+  </div>
+  <div class="scroll-down" onclick="document.getElementById('posts').scrollIntoView({behavior:'smooth'})">
+    <i class="ri-arrow-down-double-line"></i>
+  </div>
+</section>
+
+<!-- Posts -->
+<section id="posts" class="section container py-5" style="max-width:860px">
+  <div class="section-title mb-4">
+    <i class="ri-quill-pen-line"></i>
+    <span>最新文章</span>
+    <span class="section-line"></span>
+  </div>
+
+  <div class="d-flex flex-column gap-4">
+    <div class="post-card">
+      <a href="posts/cpp-lambda-netlink/">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+          <div class="post-title"><i class="ri-code-s-slash-line me-2" style="color:var(--accent2)"></i>C++ Lambda 与 Netlink Socket 学习笔记</div>
+          <span class="post-meta"><i class="ri-calendar-line me-1"></i>2026-06-25</span>
+        </div>
+        <p class="post-desc">学习 C++ Lambda 表达式作为回调函数的用法，以及如何通过 Netlink Socket 监听 Linux 内核网络端口状态变化。涵盖事件驱动架构、状态快照与增量检测。</p>
+        <div class="d-flex gap-2 flex-wrap">
+          <span class="tag tag-purple"><i class="ri-terminal-box-line"></i> C++</span>
+          <span class="tag tag-green"><i class="ri-ubuntu-line"></i> Linux</span>
+          <span class="tag tag-pink"><i class="ri-wifi-line"></i> 网络编程</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="post-card">
+      <a href="posts/claude-code-guide/">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+          <div class="post-title"><i class="ri-robot-2-line me-2" style="color:var(--accent3)"></i>Claude Code 完全使用指南（VS Code 版）</div>
+          <span class="post-meta"><i class="ri-calendar-line me-1"></i>2026-06-24</span>
+        </div>
+        <p class="post-desc">面向新手的 Claude Code 中文使用指南，涵盖安装配置、斜杠命令、记忆系统、MCP 服务器、权限管理、DeepSeek V4 接入。配合 CC Switch 多账号管理。</p>
+        <div class="d-flex gap-2 flex-wrap">
+          <span class="tag tag-yellow"><i class="ri-sparkling-line"></i> AI</span>
+          <span class="tag tag-blue"><i class="ri-code-box-line"></i> VS Code</span>
+          <span class="tag tag-green"><i class="ri-tools-line"></i> 工具</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer class="text-center py-4">
+  <p class="mb-0 small">© 2026 Ssshi27 · <a href="https://pages.github.com/">GitHub Pages</a> · <i class="ri-heart-fill text-danger"></i></p>
+</footer>
+
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"><i class="ri-arrow-up-line"></i></button>
+
+<script>
+// Particles
+(function(){const c=document.getElementById('particles'),x=c.getContext('2d');let w,h,ps=[];function resize(){w=c.width=innerWidth;h=c.height=innerHeight}resize();addEventListener('resize',resize);class P{constructor(){this.reset()}reset(){this.x=Math.random()*w;this.y=Math.random()*h;this.vx=(Math.random()-.5)*.4;this.vy=(Math.random()-.5)*.4;this.r=Math.random()*1.5+.5;this.a=Math.random()*.4+.1}update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>w||this.y<0||this.y>h)this.reset()}draw(){x.beginPath();x.arc(this.x,this.y,this.r,0,Math.PI*2);x.fillStyle=`rgba(129,140,248,${this.a})`;x.fill()}}for(let i=0;i<60;i++)ps.push(new P);function loop(){x.clearRect(0,0,w,h);for(let i=0;i<ps.length;i++){ps[i].update();ps[i].draw();for(let j=i+1;j<ps.length;j++){const dx=ps[i].x-ps[j].x,dy=ps[i].y-ps[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<100){x.beginPath();x.moveTo(ps[i].x,ps[i].y);x.lineTo(ps[j].x,ps[j].y);x.strokeStyle=`rgba(129,140,248,${.08*(1-d/100)})`;x.lineWidth=.5;x.stroke()}}}requestAnimationFrame(loop)}loop()})();
+
+// Typewriter
+(function(){const ts=["Hello World! 欢迎来到我的博客 🎉","永恒的唯物主义 ⚡","分享技术，记录成长 📖","Stay hungry, stay foolish. 💡"];const el=document.getElementById('typed');let ti=0,ci=0,del=false;function t(){const s=ts[ti];if(!del){el.textContent=s.substring(0,ci+1);ci++;if(ci===s.length){setTimeout(()=>{del=true;t()},2200);return}setTimeout(t,80)}else{el.textContent=s.substring(0,ci-1);ci--;if(ci===0){del=false;ti=(ti+1)%ts.length;setTimeout(t,500);return}setTimeout(t,40)}}t()})();
+
+// Back top
+addEventListener('scroll',()=>{document.getElementById('backTop').classList.toggle('show',scrollY>400)});
+
+// Scroll reveal
+(function(){const cards=document.querySelectorAll('.post-card');const ob=new IntersectionObserver(es=>{es.forEach((e,i)=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';ob.unobserve(e.target)}})},{threshold:.1});cards.forEach(c=>{c.style.opacity='0';c.style.transform='translateY(30px)';c.style.transition='all .6s cubic-bezier(.4,0,.2,1)';ob.observe(c)})})();
+</script>
+</body>
+</html>
