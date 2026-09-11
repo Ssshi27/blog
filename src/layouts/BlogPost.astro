@@ -19,7 +19,18 @@ const { post, headings, prev, next, related } = Astro.props;
 const { title, summary, date, updated, category, subcategory, tags, difficulty, status, quality_score, source } =
 	post.data;
 const categoryLabel = CATEGORIES[category] ?? category;
-const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const toc = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+const tocGroups = toc.reduce<Array<{ heading: MarkdownHeading; children: MarkdownHeading[] }>>(
+	(groups, heading) => {
+		if (heading.depth === 2 || groups.length === 0) {
+			groups.push({ heading, children: [] });
+		} else {
+			groups[groups.length - 1].children.push(heading);
+		}
+		return groups;
+	},
+	[],
+);
 const sourceUrl = GITHUB_REPO ? `${GITHUB_REPO}/blob/main/src/content/blog/${post.id}.md` : null;
 ---
 
@@ -27,8 +38,8 @@ const sourceUrl = GITHUB_REPO ? `${GITHUB_REPO}/blob/main/src/content/blog/${pos
 	<head>
 		<BaseHead title={title} description={summary} />
 		<style>
-			.layout { display: grid; grid-template-columns: minmax(0, 720px) 190px; gap: clamp(2rem, 5vw, 5rem); justify-content: center; align-items: start; }
-			.prose { width: 100%; max-width: 720px; color: rgb(var(--gray-dark)); }
+			.layout { display: grid; grid-template-columns: minmax(12rem, 210px) minmax(0, 720px); gap: clamp(2rem, 5vw, 4.5rem); justify-content: center; align-items: start; }
+			.prose { grid-column: 2; width: 100%; max-width: 720px; color: rgb(var(--gray-dark)); }
 			.breadcrumb { margin-bottom: 1.4rem; color: var(--ink-muted); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .68rem; line-height: 1.7; }
 			.breadcrumb a { color: inherit; text-decoration: none; } .breadcrumb a:hover { color: var(--accent-dark); text-decoration: underline; }
 			.title-block { margin-bottom: 2.4rem; padding-bottom: 2rem; border-bottom: 2px solid var(--ink); }
@@ -36,14 +47,21 @@ const sourceUrl = GITHUB_REPO ? `${GITHUB_REPO}/blob/main/src/content/blog/${pos
 			.meta { display: flex; flex-wrap: wrap; gap: .5rem .8rem; color: var(--ink-muted); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .68rem; letter-spacing: .015em; }
 			.meta .category { color: var(--accent-dark); font-weight: 700; } .meta a { color: inherit; } .meta a:hover { color: var(--accent-dark); }
 			.notice { margin-bottom: 1.5rem; padding: .85rem 1rem; border: 1px solid #dbc797; background: #fbf4df; color: #725318; font-size: .86rem; }
-			.toc { position: sticky; top: 6.2rem; padding-top: .35rem; border-top: 2px solid var(--ink); font-size: .76rem; }
-			.toc h4 { margin: .7rem 0 .8rem; font-size: .78rem; letter-spacing: .03em; } .toc ul { margin: 0; padding: 0; list-style: none; } .toc li { margin: .48rem 0; } .toc li.depth-3 { padding-left: .75rem; }
-			.toc a { color: var(--ink-muted); text-decoration: none; } .toc a:hover { color: var(--accent-dark); text-decoration: underline; }
+			.toc { grid-column: 1; grid-row: 1; position: sticky; top: 6.2rem; display: flex; max-height: calc(100dvh - 7.2rem); min-height: 0; flex-direction: column; border-top: 2px solid var(--ink); font-size: .76rem; }
+			.toc h4 { flex: 0 0 auto; margin: .7rem 0 .8rem; color: var(--ink); font-size: .78rem; letter-spacing: .03em; }
+			.toc__scroll { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 .45rem .35rem 0; scrollbar-gutter: stable; }
+			.toc__scroll::-webkit-scrollbar { width: .35rem; } .toc__scroll::-webkit-scrollbar-thumb { border-radius: 99px; background: var(--line); }
+			.toc-list, .toc-subsections { margin: 0; padding: 0; list-style: none; }
+			.toc-section + .toc-section { margin-top: .3rem; }
+			.toc-section > a { color: var(--ink-muted); font-weight: 700; line-height: 1.38; }
+			.toc-subsections { margin: .2rem 0 .4rem .22rem; padding-left: .7rem; border-left: 1px solid var(--line); }
+			.toc-subsections li + li { margin-top: .12rem; } .toc-subsections a { color: var(--ink-muted); font-size: .7rem; line-height: 1.42; }
+			.toc a { text-decoration: none; } .toc a:hover { color: var(--accent-dark); text-decoration: underline; }
 			.prev-next { display: flex; justify-content: space-between; gap: 1.5rem; margin-top: 4rem; padding-top: 1.6rem; border-top: 1px solid var(--line); }
 			.prev-next a { display: block; max-width: 26rem; color: var(--ink); font-weight: 700; text-decoration: none; } .prev-next a:hover { color: var(--accent-dark); }
 			.prev-next .label { display: block; margin-bottom: .25rem; color: var(--ink-muted); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .65rem; font-weight: 400; }
 			.related { margin-top: 3rem; padding-top: 1.6rem; border-top: 1px solid var(--line); } .related ul { padding-left: 1.2em; } .source-link { margin-top: 2rem; font-size: .8rem; }
-			@media (max-width: 1000px) { .layout { grid-template-columns: minmax(0, 720px); } .toc { display: none; } }
+			@media (max-width: 1000px) { .layout { grid-template-columns: minmax(0, 720px); } .prose { grid-column: 1; } .toc { display: none; } }
 			@media (max-width: 600px) { .title-block { padding-bottom: 1.5rem; } .prev-next { flex-direction: column; } }
 		</style>
 	</head>
@@ -125,9 +143,9 @@ const sourceUrl = GITHUB_REPO ? `${GITHUB_REPO}/blob/main/src/content/blog/${pos
 							<section class="related">
 								<h3>相关文章</h3>
 								<ul>
-									{related.map((p) => (
+									{related.map((relatedPost) => (
 										<li>
-											<a href={postUrl(p)}>{p.data.title}</a>
+											<a href={postUrl(relatedPost)}>{relatedPost.data.title}</a>
 										</li>
 									))}
 								</ul>
@@ -137,16 +155,29 @@ const sourceUrl = GITHUB_REPO ? `${GITHUB_REPO}/blob/main/src/content/blog/${pos
 				</article>
 
 				{
-					toc.length > 0 && (
-						<aside class="toc">
-							<h4>本文目录</h4>
-							<ul>
-								{toc.map((h) => (
-									<li class={`depth-${h.depth}`}>
-										<a href={`#${h.slug}`}>{h.text}</a>
-									</li>
-								))}
-							</ul>
+					tocGroups.length > 0 && (
+						<aside class="toc" aria-labelledby="toc-title">
+							<h4 id="toc-title">本文目录</h4>
+							<div class="toc__scroll" tabindex="0">
+								<ul class="toc-list">
+									{tocGroups.map((group) => (
+										<li class="toc-section">
+											<a href={`#${group.heading.slug}`}>{group.heading.text}</a>
+											{
+												group.children.length > 0 && (
+													<ul class="toc-subsections">
+														{group.children.map((heading) => (
+															<li>
+																<a href={`#${heading.slug}`}>{heading.text}</a>
+															</li>
+														))}
+													</ul>
+												)
+											}
+										</li>
+									))}
+								</ul>
+							</div>
 						</aside>
 					)
 				}
@@ -164,28 +195,7 @@ const sourceUrl = GITHUB_REPO ? `${GITHUB_REPO}/blob/main/src/content/blog/${pos
 				fontFamily: 'Atkinson, sans-serif',
 				flowchart: { useMaxWidth: true, htmlLabels: true, curve: 'basis' },
 				themeVariables: {
-					background: '#f6f8f1',
-					mainBkg: '#eaf1e7',
-					primaryColor: '#eaf1e7',
-					primaryTextColor: '#1b2b24',
-					primaryBorderColor: '#2e6b4f',
-					nodeBkg: '#eaf1e7',
-					nodeTextColor: '#1b2b24',
-					nodeBorder: '#2e6b4f',
-					lineColor: '#5f7569',
-					secondaryColor: '#f8f3df',
-					tertiaryColor: '#dce9df',
-					clusterBkg: '#f8f6e9',
-					clusterBorder: '#788a7a',
-					edgeLabelBackground: '#fbfaf5',
-					signalColor: '#2e6b4f',
-					signalTextColor: '#1b2b24',
-					actorBkg: '#eaf1e7',
-					actorBorder: '#2e6b4f',
-					actorTextColor: '#1b2b24',
-					noteBkgColor: '#f8f3df',
-					noteBorderColor: '#b48a36',
-					noteTextColor: '#4d3a12',
+					background: '#f6f8f1', mainBkg: '#eaf1e7', primaryColor: '#eaf1e7', primaryTextColor: '#1b2b24', primaryBorderColor: '#2e6b4f', nodeBkg: '#eaf1e7', nodeTextColor: '#1b2b24', nodeBorder: '#2e6b4f', lineColor: '#5f7569', secondaryColor: '#f8f3df', tertiaryColor: '#dce9df', clusterBkg: '#f8f6e9', clusterBorder: '#788a7a', edgeLabelBackground: '#fbfaf5', signalColor: '#2e6b4f', signalTextColor: '#1b2b24', actorBkg: '#eaf1e7', actorBorder: '#2e6b4f', actorTextColor: '#1b2b24', noteBkgColor: '#f8f3df', noteBorderColor: '#b48a36', noteTextColor: '#4d3a12',
 				},
 			});
 
@@ -198,46 +208,39 @@ const sourceUrl = GITHUB_REPO ? `${GITHUB_REPO}/blob/main/src/content/blog/${pos
 				container.textContent = code.textContent ?? '';
 				pre.replaceWith(container);
 			}
-			if (blocks.length > 0) {
-				await mermaid.run({ querySelector: '.mermaid' });
-			}
+			if (blocks.length > 0) await mermaid.run({ querySelector: '.mermaid' });
 
 			const toc = document.querySelector('.toc');
-			if (toc) {
+			const tocScroll = toc?.querySelector('.toc__scroll');
+			if (toc && tocScroll) {
 				const links = [...toc.querySelectorAll('a[href^="#"]')];
-				const sections = links
-					.map((link) => ({
-						link,
-						heading: document.getElementById(decodeURIComponent(link.hash.slice(1))),
-					}))
-					.filter((item) => item.heading);
-
+				const sections = links.map((link) => ({ link, heading: document.getElementById(decodeURIComponent(link.hash.slice(1))) })).filter((item) => item.heading);
 				let frameRequested = false;
+				let activeLink = null;
+				const revealActiveLink = (link) => {
+					const listRect = tocScroll.getBoundingClientRect();
+					const linkRect = link.getBoundingClientRect();
+					if (linkRect.top >= listRect.top && linkRect.bottom <= listRect.bottom) return;
+					const target = tocScroll.scrollTop + linkRect.top - listRect.top - listRect.height / 2 + linkRect.height / 2;
+					tocScroll.scrollTo({ top: Math.max(0, target), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+				};
 				const updateActiveSection = () => {
 					frameRequested = false;
+					if (!sections.length) return;
 					const headerHeight = document.querySelector('header')?.getBoundingClientRect().height ?? 0;
 					const readingLine = headerHeight + 28;
 					let active = sections[0];
-
-					for (const section of sections) {
-						if (section.heading.getBoundingClientRect().top <= readingLine) active = section;
-						else break;
-					}
-
+					for (const section of sections) { if (section.heading.getBoundingClientRect().top <= readingLine) active = section; else break; }
 					for (const section of sections) {
 						const isActive = section === active;
 						section.link.classList.toggle('is-active', isActive);
-						if (isActive) section.link.setAttribute('aria-current', 'location');
-						else section.link.removeAttribute('aria-current');
+						if (isActive) section.link.setAttribute('aria-current', 'location'); else section.link.removeAttribute('aria-current');
 					}
+					if (active.link !== activeLink) { activeLink = active.link; revealActiveLink(active.link); }
 				};
 				const requestActiveUpdate = () => {
-					if (!frameRequested) {
-						frameRequested = true;
-						requestAnimationFrame(updateActiveSection);
-					}
+					if (!frameRequested) { frameRequested = true; requestAnimationFrame(updateActiveSection); }
 				};
-
 				window.addEventListener('scroll', requestActiveUpdate, { passive: true });
 				window.addEventListener('resize', requestActiveUpdate);
 				for (const link of links) link.addEventListener('click', requestActiveUpdate);
