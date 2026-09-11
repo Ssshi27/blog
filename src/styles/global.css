@@ -18,8 +18,9 @@ textarea, input { width: 100%; font: inherit; } table { width: 100%; border-coll
 img { display: block; max-width: 100%; height: auto; border-radius: .4rem; }
 code { padding: .16em .38em; border-radius: .22rem; background: var(--paper-deep); color: var(--accent-dark); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .84em; }
 pre { margin: 1.8em 0; padding: 1.35em; overflow-x: auto; border: 1px solid #293b31; border-radius: .45rem; background: #1b2b24; box-shadow: 0 12px 28px rgba(27, 43, 36, .14); } pre > code { all: unset; }
-pre.mermaid { margin: 2rem 0; padding: clamp(1rem, 4vw, 2.2rem); overflow-x: auto; border: 1px solid var(--line); border-radius: .5rem; background: #f6f8f1; box-shadow: var(--shadow-soft); text-align: center; }
-pre.mermaid svg { display: inline-block; max-width: 100%; height: auto; }
+pre.mermaid { margin: 2rem 0; padding: clamp(1rem, 4vw, 2.2rem); overflow-x: auto; border: 1px solid var(--line); border-radius: .5rem; background: #f6f8f1 !important; color: var(--ink) !important; box-shadow: var(--shadow-soft); text-align: center; }
+pre.mermaid svg { display: inline-block; max-width: 100%; height: auto; background: #f6f8f1 !important; }
+pre.mermaid :is(.edgeLabel, .labelBkg) { background: #fbfaf5 !important; }
 blockquote { margin: 2em 0; padding: .15em 0 .15em 1.35em; border-left: 2px solid #c18c3c; color: var(--ink-muted); font-size: 1.16em; font-style: italic; }
 hr { margin: 3em 0; border: 0; border-top: 1px solid var(--line); } ::selection { background: #d8e5d8; color: var(--ink); }
 @media (max-width: 720px) { body { font-size: 17px; } main { width: min(100% - 2rem, 1040px); padding: 2.8rem 0 3.5rem; } section + section { margin-top: 3.2rem; } }
