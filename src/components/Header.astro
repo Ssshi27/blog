@@ -5,11 +5,17 @@ import HeaderLink from './HeaderLink.astro';
 ---
 
 <header>
-	<nav>
-		<h2><a href={url('/')}>{SITE_TITLE}</a></h2>
+	<nav aria-label="主导航">
+		<a class="brand" href={url('/')} aria-label={`${SITE_TITLE}首页`}>
+			<span class="brand-mark" aria-hidden="true">S</span>
+			<span>
+				<strong>{SITE_TITLE}</strong>
+				<small>个人知识库</small>
+			</span>
+		</a>
 		<div class="internal-links">
 			<HeaderLink href={url('/')}>首页</HeaderLink>
-			<HeaderLink href={url('/blog')}>全部文章</HeaderLink>
+			<HeaderLink href={url('/blog')}>文章</HeaderLink>
 			<HeaderLink href={url('/categories')}>分类</HeaderLink>
 			<HeaderLink href={url('/tags')}>标签</HeaderLink>
 			<HeaderLink href={url('/paths')}>学习路径</HeaderLink>
@@ -21,52 +27,63 @@ import HeaderLink from './HeaderLink.astro';
 </header>
 <style>
 	header {
-		margin: 0;
-		padding: 0 1em;
-		background: white;
-		box-shadow: 0 2px 8px rgba(var(--black), 5%);
 		position: sticky;
 		top: 0;
 		z-index: 100;
-	}
-	h2 {
-		margin: 0;
-		font-size: 1em;
-		white-space: nowrap;
-	}
-
-	h2 a,
-	h2 a.active {
-		text-decoration: none;
+		border-bottom: 1px solid rgba(214, 221, 212, 0.82);
+		background: rgba(251, 250, 245, 0.9);
+		backdrop-filter: blur(14px);
 	}
 	nav {
 		display: flex;
+		width: min(100% - 2.5rem, 1180px);
+		min-height: 4.75rem;
+		margin: 0 auto;
 		align-items: center;
 		justify-content: space-between;
-		gap: 1em;
+		gap: 1.5rem;
 	}
-	.internal-links {
-		display: flex;
-		flex-wrap: wrap;
-	}
-	nav a {
-		padding: 1em 0.5em;
-		color: var(--black);
-		border-bottom: 4px solid transparent;
+	.brand {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.7rem;
+		color: var(--ink);
 		text-decoration: none;
+		white-space: nowrap;
 	}
-	nav a.active {
+	.brand-mark {
+		display: grid;
+		width: 2rem;
+		height: 2rem;
+		place-items: center;
+		border-radius: 50%;
+		background: var(--ink);
+		color: var(--paper);
+		font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+		font-size: 0.84rem;
+		font-weight: 700;
+	}
+	.brand strong { display: block; color: inherit; font-size: 1rem; letter-spacing: -0.025em; line-height: 1.1; }
+	.brand small { display: block; margin-top: 0.12rem; color: var(--ink-muted); font-size: 0.67rem; letter-spacing: 0.08em; }
+	.internal-links { display: flex; flex-wrap: wrap; justify-content: flex-end; }
+	nav :global(.internal-links a) {
+		padding: 0.5rem 0.57rem;
+		border-bottom: 2px solid transparent;
+		color: var(--ink-muted);
+		font-size: 0.82rem;
+		font-weight: 700;
+		letter-spacing: 0.01em;
 		text-decoration: none;
-		border-bottom-color: var(--accent);
+		transition: color 160ms ease, border-color 160ms ease;
 	}
-	@media (max-width: 720px) {
-		nav {
-			flex-direction: column;
-			gap: 0;
-			padding: 0.5em 0;
-		}
-		nav a {
-			padding: 0.5em;
-		}
+	nav :global(.internal-links a:hover), nav :global(.internal-links a.active) { color: var(--accent-dark); border-bottom-color: var(--accent); }
+	@media (max-width: 860px) {
+		nav { width: min(100% - 2rem, 1180px); padding: 0.7rem 0; align-items: flex-start; }
+		.internal-links { gap: 0.05rem; }
+	}
+	@media (max-width: 620px) {
+		nav { flex-direction: column; gap: 0.5rem; }
+		.internal-links { justify-content: flex-start; }
+		nav :global(.internal-links a) { padding: 0.35rem 0.48rem; }
 	}
 </style>

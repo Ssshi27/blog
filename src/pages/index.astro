@@ -17,63 +17,22 @@ const usedCategories = [...new Set(posts.map((p) => p.data.category))];
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
 		<style>
-			.hero {
-				text-align: center;
-				padding: 2.5em 1em 1.5em;
-			}
-			.hero h1 {
-				margin-bottom: 0.3em;
-			}
-			.hero p {
-				color: rgb(var(--gray));
-			}
-			.stats {
-				display: flex;
-				justify-content: center;
-				gap: 2em;
-				margin-top: 1em;
-				color: rgb(var(--gray));
-				font-size: 0.95em;
-			}
-			.stats strong {
-				color: var(--accent);
-			}
-			.section-title {
-				display: flex;
-				justify-content: space-between;
-				align-items: baseline;
-			}
-			.section-title a {
-				font-size: 0.85em;
-				text-decoration: none;
-			}
-			.posts {
-				display: grid;
-				gap: 1em;
-			}
-			.categories {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 0.6em;
-			}
-			.categories a {
-				padding: 0.4em 0.9em;
-				border: 1px solid rgba(var(--gray), 30%);
-				border-radius: 999px;
-				text-decoration: none;
-				color: rgb(var(--gray-dark));
-				background: white;
-				font-size: 0.9em;
-			}
-			.categories a:hover {
-				border-color: var(--accent);
-				color: var(--accent);
-			}
-			.empty {
-				padding: 2em;
-				text-align: center;
-				color: rgb(var(--gray));
-			}
+			.hero { max-width: 52rem; padding: 4.2rem 0 2rem; }
+			.hero::before { display: block; margin-bottom: 1.15rem; color: var(--accent-dark); content: 'PERSONAL KNOWLEDGE BASE'; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .68rem; font-weight: 700; letter-spacing: .14em; }
+			.hero h1 { max-width: 10ch; margin-bottom: .28em; }
+			.hero p { max-width: 39rem; margin-bottom: 0; color: var(--ink-muted); font-size: 1.12rem; }
+			.stats { display: flex; flex-wrap: wrap; gap: .75rem 1.6rem; margin-top: 2rem; color: var(--ink-muted); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .72rem; }
+			.stats span { display: inline-flex; align-items: baseline; gap: .35rem; }
+			.stats strong { color: #b47928; font-size: 1.1rem; }
+			.section-title { display: flex; justify-content: space-between; align-items: end; gap: 1rem; padding-bottom: 1rem; border-bottom: 2px solid var(--ink); }
+			.section-title h2 { margin: 0; font-size: clamp(1.55rem, 3vw, 2rem); }
+			.section-title a { color: var(--accent-dark); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .72rem; font-weight: 700; text-decoration: none; }
+			.posts { display: grid; gap: 0; }
+			.categories { display: flex; flex-wrap: wrap; gap: .55rem; }
+			.categories a { padding: .45rem .7rem; border: 1px solid var(--line); color: var(--ink-muted); background: rgba(255, 255, 255, .46); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .72rem; text-decoration: none; transition: color 160ms ease, border-color 160ms ease, background 160ms ease; }
+			.categories a:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-dark); }
+			.empty { padding: 2rem 0; color: var(--ink-muted); }
+			@media (max-width: 620px) { .hero { padding-top: 1.5rem; } .stats { gap: .55rem 1rem; } }
 		</style>
 	</head>
 	<body>

@@ -12,82 +12,38 @@ const categoryLabel = CATEGORIES[post.data.category] ?? post.data.category;
 ---
 
 <article class="post-card">
-	<h3>
-		<a href={postUrl(post)}>{post.data.title}</a>
-	</h3>
-	<p class="summary">{post.data.summary}</p>
 	<div class="meta">
 		<span class="category">{categoryLabel}</span>
 		<span class="difficulty">{DIFFICULTY_LABELS[post.data.difficulty]}</span>
-		<FormattedDate date={post.data.date} />
+		<span class="date"><FormattedDate date={post.data.date} /></span>
 	</div>
+	<h3><a href={postUrl(post)}>{post.data.title}</a></h3>
+	<p class="summary">{post.data.summary}</p>
 	{
 		post.data.tags.length > 0 && (
 			<div class="tags">
 				{post.data.tags.map((tag) => (
-					<a class="tag" href={url(`/tags/${encodeURIComponent(tag)}/`)}>
-						#{tag}
-					</a>
+					<a class="tag" href={url(`/tags/${encodeURIComponent(tag)}/`)}>#{tag}</a>
 				))}
 			</div>
 		)
 	}
 </article>
 <style>
-	.post-card {
-		padding: 1.2em 1.4em;
-		border: 1px solid rgba(var(--gray), 25%);
-		border-radius: 10px;
-		background: white;
-		transition: box-shadow 0.15s ease;
-	}
-	.post-card:hover {
-		box-shadow: var(--box-shadow);
-	}
-	h3 {
-		margin: 0 0 0.4em;
-		font-size: 1.2em;
-	}
-	h3 a {
-		text-decoration: none;
-		color: var(--black);
-	}
-	h3 a:hover {
-		color: var(--accent);
-	}
-	.summary {
-		margin: 0 0 0.8em;
-		color: rgb(var(--gray));
-		font-size: 0.95em;
-	}
-	.meta {
-		display: flex;
-		align-items: center;
-		gap: 0.8em;
-		font-size: 0.85em;
-		color: rgb(var(--gray));
-	}
-	.category {
-		color: var(--accent);
-		font-weight: 700;
-	}
-	.difficulty {
-		padding: 0.1em 0.5em;
-		border-radius: 4px;
-		background: rgba(var(--gray-light), 0.5);
-	}
-	.tags {
-		margin-top: 0.6em;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5em;
-	}
-	.tag {
-		font-size: 0.8em;
-		color: rgb(var(--gray));
-		text-decoration: none;
-	}
-	.tag:hover {
-		color: var(--accent);
-	}
+	.post-card { position: relative; padding: 1.65rem 0; border-top: 1px solid var(--line); transition: padding 180ms ease, background 180ms ease; }
+	.post-card::after { position: absolute; top: 1.9rem; left: -0.7rem; width: 0.27rem; height: 0.27rem; border-radius: 50%; background: #c18c3c; content: ''; opacity: 0; transition: opacity 180ms ease; }
+	.post-card:hover { padding-inline: 1rem; background: rgba(255, 255, 255, 0.54); }
+	.post-card:hover::after { opacity: 1; }
+	.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.45rem 0.75rem; color: var(--ink-muted); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.68rem; letter-spacing: 0.035em; }
+	.category { color: var(--accent-dark); font-weight: 700; text-transform: uppercase; }
+	.difficulty { padding: 0.08rem 0.38rem; border: 1px solid var(--line); color: var(--ink-muted); }
+	.date { margin-left: auto; }
+	h3 { margin: 0.62rem 0 0.5rem; font-size: clamp(1.28rem, 2.4vw, 1.65rem); }
+	h3 a { color: var(--ink); text-decoration: none; }
+	h3 a:hover { color: var(--accent-dark); }
+	.summary { max-width: 47rem; margin: 0; color: var(--ink-muted); font-size: 0.92rem; line-height: 1.65; }
+	.tags { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.85rem; }
+	.tag { color: var(--ink-muted); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.7rem; text-decoration: none; }
+	.tag:hover { color: var(--accent-dark); }
+	@media (max-width: 600px) { .date { width: 100%; margin-left: 0; } .post-card:hover { padding-inline: 0.45rem; } }
 </style>
